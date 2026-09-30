@@ -1,0 +1,80 @@
+<!doctype html>
+<!--
+  MOCK "eBird-like" site — for prototyping the ephemeral login-then-automate
+  flow ONLY. It stands in for a real login-gated export page so the runner can
+  be demonstrated end-to-end WITHOUT touching real eBird (which would trip 2FA,
+  ToS, and can't be tested honestly here). Credentials below are throwaway
+  demo values, not secrets.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>MockBird — My Data</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; }
+      input, button { display: block; width: 100%; padding: 10px; margin: 8px 0; font-size: 16px; }
+      .hidden { display: none; }
+      .err { color: #b91c1c; }
+    </style>
+  </head>
+  <body>
+    <div id="login-view">
+      <h1>MockBird sign in</h1>
+      <form id="login-form">
+        <input id="username" name="username" placeholder="Username" autocomplete="username" />
+        <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" />
+        <button id="login-btn" type="submit">Sign in</button>
+        <p id="login-err" class="err"></p>
+      </form>
+    </div>
+
+    <div id="dashboard-view" class="hidden">
+      <h1>Welcome, <span id="who"></span></h1>
+      <p>Your observation history is ready.</p>
+      <button id="download-btn">Download My Data</button>
+      <pre id="export-status"></pre>
+    </div>
+
+    <script>
+      // Demo-only fixed credentials. The point of the prototype is the
+      // credential LIFECYCLE (ephemeral, no-store), not real authentication.
+      const DEMO_USER = 'demo-birder'
+      const DEMO_PASS = 'hunter2-demo'
+
+      // A tiny MyEBirdData.csv the "export" hands back once authenticated.
+      const CSV = [
+        'Submission ID,Common Name,Scientific Name,Taxonomic Order,Count,State/Province,County,Location ID,Location,Latitude,Longitude,Date,Time,Protocol,Duration (Min),All Obs Reported,Distance Traveled (km),Area Covered (ha),Number of Observers,Breeding Code,Observation Details,Checklist Comments,ML Catalog Numbers',
+        'S1,American Robin,Turdus migratorius,1,2,MA,Middlesex,L1,Backyard,42.3,-71.1,2026-05-01,08:00,Traveling,30,1,1.2,,1,,,,',
+        'S1,Northern Cardinal,Cardinalis cardinalis,2,1,MA,Middlesex,L1,Backyard,42.3,-71.1,2026-05-01,08:00,Traveling,30,1,1.2,,1,,,,',
+        'S2,Black-capped Chickadee,Poecile atricapillus,3,3,MA,Middlesex,L2,Pond,42.4,-71.2,2026-05-10,07:30,Stationary,20,1,0,,1,,,,',
+        'S2,Blue Jay,Cyanocitta cristata,4,2,MA,Middlesex,L2,Pond,42.4,-71.2,2026-05-10,07:30,Stationary,20,1,0,,1,,,,',
+        'S3,Red-tailed Hawk,Buteo jamaicensis,5,1,MA,Essex,L3,Ridge,42.6,-70.9,2026-06-02,10:15,Traveling,45,1,2.0,,2,,,,',
+        'S3,Gull sp.,Larus sp.,6,4,MA,Essex,L3,Ridge,42.6,-70.9,2026-06-02,10:15,Traveling,45,1,2.0,,2,,,,',
+        'S4,Osprey,Pandion haliaetus,7,1,MA,Barnstable,L4,Marsh,41.7,-70.3,2026-07-04,09:00,Traveling,60,1,3.5,,1,,,,',
+      ].join('\n')
+
+      const $ = (id) => document.getElementById(id)
+
+      $('login-form').addEventListener('submit', (e) => {
+        e.preventDefault()
+        const u = $('username').value
+        const p = $('password').value
+        if (u === DEMO_USER && p === DEMO_PASS) {
+          $('who').textContent = u
+          $('login-view').classList.add('hidden')
+          $('dashboard-view').classList.remove('hidden')
+        } else {
+          $('login-err').textContent = 'Invalid credentials.'
+        }
+      })
+
+      $('download-btn').addEventListener('click', () => {
+        // Simulate the export: expose the CSV so the automation can capture it.
+        // A real site would trigger a file download; here we drop it into the
+        // DOM (the runner reads it back), which keeps the mock dependency-free.
+        $('export-status').textContent = CSV
+        $('export-status').setAttribute('data-export-ready', 'true')
+      })
+    </script>
+  </body>
+</html>

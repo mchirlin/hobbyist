@@ -1,0 +1,16 @@
+# Local KiroCrew / editor state — not source
+.kiro/
+
+# OS cruft
+.DS_Store
+
+# Node
+node_modules/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Environment / secrets
+.env
+.env.*
+*.local
