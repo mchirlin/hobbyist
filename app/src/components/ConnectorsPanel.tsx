@@ -1,11 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   listConnectors,
   AUTOMATION_META,
   type Connector,
 } from '../integrations/registry'
 import { registerBuiltinConnectors } from '../integrations/connectors'
-import { MICHAEL_ULTIMATE_RESULTS } from '../integrations/ultimate'
+import { syncUltimateResults } from '../integrations/ultimate'
 import { MICHAEL_GEOCACHE_FINDS } from '../integrations/geocaching'
 import type { HobbyActivity } from '../integrations/activity'
 import { EphemeralConnectCard } from './EphemeralConnectCard'
@@ -13,19 +13,11 @@ import { EphemeralConnectCard } from './EphemeralConnectCard'
 // Ensure the built-ins are registered before the component reads the registry.
 registerBuiltinConnectors()
 
-/** Demo payload for a `url`-kind connector's "load" button (prototype seed data). */
-function demoPayloadFor(id: string): unknown {
-  if (id === 'ultimate-results') return MICHAEL_ULTIMATE_RESULTS
-  if (id === 'geocaching') return MICHAEL_GEOCACHE_FINDS
-  return []
-}
-
-/** Button label for a `url`-kind connector. */
-function urlActionLabel(id: string): string {
-  if (id === 'ultimate-results') return 'Load my WFDF/USAU results'
-  if (id === 'geocaching') return 'Load my geocaching finds'
-  return 'Load my results'
-}
+/** Optional CORS proxy for browser-side scrape fetches (e.g. results.wfdf.sport,
+ * which sends no CORS headers). Set VITE_WFDF_PROXY to "https://my-proxy/?u=".
+ * When unset, the live fetch fails in the browser and the connector falls back
+ * to seed data — the parse is real either way. */
+const WFDF_PROXY = (import.meta.env.VITE_WFDF_PROXY as string | undefined) || undefined
 
 interface Props {
   /** Called when a live connector produces a normalized activity. */
@@ -44,6 +36,8 @@ function levelBadge(c: Connector) {
 
 function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onActivity'] }) {
   const meta = AUTOMATION_META[c.level]
+  const [status, setStatus] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -59,6 +53,34 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
       }
     }
     reader.readAsText(file)
+  }
+
+  // Run a `url`-kind connector's sync. Ultimate attempts a REAL fetch of
+  // results.wfdf.sport (via VITE_WFDF_PROXY in the browser) and reports whether
+  // it got live data or fell back to seed. Geocaching uses its demo fixture.
+  async function onUrlSync() {
+    setBusy(true)
+    setStatus(null)
+    try {
+      if (c.id === 'ultimate-results') {
+        const { results, live } = await syncUltimateResults({ proxyBase: WFDF_PROXY })
+        onActivity(c.normalize(results))
+        setStatus(
+          live
+            ? `Fetched live from results.wfdf.sport — ${results.length} tournaments.`
+            : `Loaded ${results.length} tournaments (seed — set VITE_WFDF_PROXY for live browser fetch).`,
+        )
+      } else if (c.id === 'geocaching') {
+        onActivity(c.normalize(MICHAEL_GEOCACHE_FINDS))
+        setStatus(`Loaded ${MICHAEL_GEOCACHE_FINDS.finds.length} finds (demo).`)
+      }
+    } catch (err) {
+      setStatus('Sync failed — see console.')
+      // eslint-disable-next-line no-console
+      console.error(`[connector:${c.id}] sync failed`, err)
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -91,13 +113,17 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
         <span className="conn-action conn-disabled">Token connect — wired via the adapter (demo)</span>
       )}
       {c.status === 'live' && c.connect.kind === 'url' && (
-        <button
-          type="button"
-          className="conn-action conn-btn"
-          onClick={() => onActivity(c.normalize(demoPayloadFor(c.id)))}
-        >
-          {urlActionLabel(c.id)}
-        </button>
+        <>
+          <button
+            type="button"
+            className="conn-action conn-btn"
+            onClick={onUrlSync}
+            disabled={busy}
+          >
+            {busy ? 'Syncing…' : c.id === 'geocaching' ? 'Load my geocaching finds' : 'Sync my results (live)'}
+          </button>
+          {status && <p className="conn-note" style={{ marginTop: 6 }}>{status}</p>}
+        </>
       )}
       {c.status === 'planned' && (
         <span className="conn-action conn-disabled">Not built yet</span>

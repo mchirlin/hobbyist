@@ -136,3 +136,77 @@ export const MICHAEL_ULTIMATE_RESULTS: WfdfTournamentResult[] = [
     // USAU publishes team placement only — no individual box score.
   },
 ]
+
+// ---- A user's known WFDF appearances (the "my events" index) --------------
+// WFDF player ids are PER EVENT, so aggregating a person across tournaments
+// needs this explicit map: each entry names the event slug, the player id ON
+// THAT EVENT, and the standings-derived division/placement (which the player
+// card does not carry). A real build would derive these by matching the user's
+// name in each event's roster; for now it's Michael's confirmed WMUCC 2026 row.
+export interface WfdfAppearance {
+  eventSlug: string
+  playerId: number
+  tournament: string
+  date?: string
+  division: string
+  placement: number
+  fieldSize?: number
+}
+
+export const MICHAEL_WFDF_APPEARANCES: WfdfAppearance[] = [
+  {
+    eventSlug: 'wmucc-2026',
+    playerId: 616,
+    tournament: 'WMUCC 2026',
+    date: '2026-06-28',
+    division: 'Grand Master Open',
+    placement: 4,
+  },
+]
+
+// The placement-only results that have NO scrapable per-player card (USAU).
+// These are always merged in alongside whatever the WFDF fetch yields.
+const PLACEMENT_ONLY_RESULTS: WfdfTournamentResult[] = MICHAEL_ULTIMATE_RESULTS.filter(
+  (r) => r.body === 'USAU',
+)
+
+/**
+ * Fetch the user's real Ultimate results: pull each WFDF appearance's player
+ * card live (through an optional CORS proxy in the browser), parse the stat
+ * line, and merge with the placement-only USAU results. On ANY failure per
+ * event (network, CORS, parse), that event falls back to its seed row so the
+ * sash never ends up emptier than the fixture. Returns newest-first.
+ */
+export async function syncUltimateResults(opts: {
+  proxyBase?: string
+  fetchImpl?: typeof fetch
+  appearances?: WfdfAppearance[]
+} = {}): Promise<{ results: WfdfTournamentResult[]; live: boolean }> {
+  const { fetchWfdfPlayerCard } = await import('./wfdfParse')
+  const appearances = opts.appearances ?? MICHAEL_WFDF_APPEARANCES
+  let anyLive = false
+  const wfdf: WfdfTournamentResult[] = []
+  for (const a of appearances) {
+    try {
+      const r = await fetchWfdfPlayerCard(
+        a.eventSlug,
+        a.playerId,
+        {
+          tournament: a.tournament, date: a.date, division: a.division,
+          placement: a.placement, fieldSize: a.fieldSize, body: 'WFDF',
+        },
+        { proxyBase: opts.proxyBase, fetchImpl: opts.fetchImpl },
+      )
+      wfdf.push(r)
+      anyLive = true
+    } catch {
+      // fall back to the seed row for this event, if we have one
+      const seed = MICHAEL_ULTIMATE_RESULTS.find((s) => s.tournament === a.tournament)
+      if (seed) wfdf.push(seed)
+    }
+  }
+  const results = [...wfdf, ...PLACEMENT_ONLY_RESULTS].sort((x, y) =>
+    (y.date ?? '').localeCompare(x.date ?? ''),
+  )
+  return { results, live: anyLive }
+}

@@ -1,12 +1,19 @@
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { dirname, join } from 'node:path'
 import {
   ultimateAdapter,
   ordinal,
   medalFor,
   resultLabel,
+  syncUltimateResults,
   MICHAEL_ULTIMATE_RESULTS,
   type WfdfTournamentResult,
 } from './ultimate'
+
+const here = dirname(fileURLToPath(import.meta.url))
+const REAL_CARD_HTML = readFileSync(join(here, '__fixtures__', 'wfdf-playercard.html'), 'utf-8')
 
 describe('ordinal', () => {
   it('formats common placements', () => {
@@ -109,5 +116,33 @@ describe('MICHAEL_ULTIMATE_RESULTS fixture (real captured data)', () => {
     expect(nats.placement).toBe(1)
     expect(nats.division).toBe('Grand Masters Men')
     expect(nats.stats).toBeUndefined()
+  })
+})
+
+describe('syncUltimateResults (real fetch path + fallback)', () => {
+  it('fetches the WFDF card live (injected fetch = real HTML) and merges USAU placement', async () => {
+    const fakeFetch = async () =>
+      ({ ok: true, status: 200, text: async () => REAL_CARD_HTML }) as Response
+    const { results, live } = await syncUltimateResults({
+      fetchImpl: fakeFetch as unknown as typeof fetch,
+    })
+    expect(live).toBe(true)
+    // WMUCC 2026 (parsed live) + USAU 2025 (placement-only) merged, newest first
+    expect(results).toHaveLength(2)
+    expect(results[0].tournament).toBe('WMUCC 2026')
+    expect(results[0].stats).toEqual({ games: 9, assists: 13, goals: 17, total: 30, wins: 5, winPct: 55.6 })
+    expect(results[1].body).toBe('USAU')
+    expect(results[1].placement).toBe(1)
+  })
+
+  it('falls back to seed rows when the fetch fails (never emptier than the fixture)', async () => {
+    const failing = async () => { throw new Error('network down') }
+    const { results, live } = await syncUltimateResults({
+      fetchImpl: failing as unknown as typeof fetch,
+    })
+    expect(live).toBe(false)
+    // still 2 tournaments (WMUCC seed + USAU), so the sash is never emptier
+    expect(results).toHaveLength(2)
+    expect(results.find((r) => r.tournament === 'WMUCC 2026')?.stats?.goals).toBe(17)
   })
 })

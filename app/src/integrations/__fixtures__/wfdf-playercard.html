@@ -1,0 +1,399 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+		<html xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'><head>
+		<meta http-equiv="Content-Style-Type" content="text/css"/>
+		<meta http-equiv="Content-Script-Type" content="text/javascript"/><meta http-equiv="Pragma" content="no-cache"/><meta http-equiv="Expires" content="-1"/><meta name='viewport' content='width=device-width, initial-scale=1.0'><link rel='icon' type='image/png' href='cust/wfdf-2025/favicon.png' />
+		<title>#24 Michael Chirlin</title>
+		<link rel="stylesheet" href="cust/wfdf-2025/layout.css?v=20" type="text/css" />
+		<link rel="stylesheet" href="cust/wfdf-2025/font.css?v=20" type="text/css" />
+		<link rel="stylesheet" href="cust/wfdf-2025/default.css?v=20" type="text/css" />
+<script type="text/javascript">
+<!--
+function checkAll(field)
+	{
+	var form = document.getElementById(field);
+		 
+		for (var i=1; i < form.elements.length; i++) 
+		{
+		 form.elements[i].checked = !form.elements[i].checked;
+		}
+	}
+
+function setId(id) 
+	{
+	var input = document.getElementById("hiddenDeleteId");
+	input.value = id;
+	}
+
+function changeseason(id){
+	var url = location.href;
+	
+	var param = "selseason";
+	var re = new RegExp("([?|&])" + param + "=.*?(&|$)","i");
+    if (url.match(re)){
+        url=url.replace(re,'$1' + param + "=" + id + '$2');
+    }else{
+        
+		if(location.href.search("view=") !=-1){
+			url = url + '&' + param + "=" + id;
+		}else{
+			url = url.substring(0,url.lastIndexOf('/'));
+			url = url + "/index.php?"+ param + "=" + id; 
+		}
+	}
+	location.href=url;
+}
+
+
+function changeseason2(id){
+	var url = location.href;
+	
+	var param = "selseason";
+
+  url = url.substring(0,url.lastIndexOf('/'));
+  //url = url + "/index.php?view=games&season=" + id + "&filter=today&group=all&"+ param + "=" + id; 
+  url = url + "/index.php?view=games&season=" + id + "&filter=tournaments&group=all&"+ param + "=" + id; 
+	location.href=url;
+}
+
+
+//-->
+</script>
+</head><body style='overflow-y:scroll;' >
+<div class='page'>
+<div class='page_top'>
+<div class='top_banner_space'></div>
+<form action='?view=playercard&amp;series=0&amp;player=616' method='post'><table border='0' cellpadding='0' cellspacing='0' style='width:100%;white-space: nowrap;'><tr>
+<td class='topheader_left'>
+<img class='menu_button' onclick='menu_toggle()' src='images/bars-solid.svg' alt='menu'><a href='https://www.wfdf.sport/' class='header_text' target='_blank'><img class='header_logo' style='width:auto;height:30px;margin: 10px 10px;' src='cust/wfdf-2025/wfdf-logo.jpg' alt='WFDF'/></a>
+</td><td class='topheader_right'><table border='0' cellpadding='0' cellspacing='0' style='width:95%;white-space: nowrap;'>
+<tr>
+<td class='right' style='padding-top:5px'>&nbsp;</td></tr>
+</table></td></tr></table></form>
+</div>
+<div class='navigation_bar'><p class='navigation_bar_text'><span style='color: grey;'>Nav. History: </span> #24 Michael Chirlin</p></div><div class='page_middle'>
+<table style='border:0px solid #fff;background-color: #ffffff;'><tr><td id='menu_left' class='menu_left'><table class='leftmenulinks'>
+<tr><td class='menuseasonlevel'><a class='seasonnav' style='text-align:center;' href='?view=teams&season=wmucc2026&amp;list=bystandings'>WMUCC 2026</a></td></tr>
+<tr><td><a class='nav' href='?view=games&amp;season=wmucc2026&amp;filter=tournaments&amp;group=all'>Games</a></td></tr>
+<tr><td><a class='nav' href='?view=teams&amp;season=wmucc2026&amp;list=allteams'>Teams</a></td></tr>
+<tr><td class='menuseparator'></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=7'>Master Mixed</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=9'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=10'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=11'>&raquo; Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=12'>&raquo; Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=13'>&raquo; Pool E</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=14'>&raquo; Pool F</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=15'>&raquo; Pool G</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=16'>&raquo; Pool H</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=46'>&raquo; Crossover</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=47'>&raquo; Round of 32</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=48'>&raquo; Playoff (1-16)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=49'>&raquo; Playoff (17-32)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=50'>&raquo; Placement Pool J</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=51'>&raquo; Placement Pool K</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=52'>&raquo; Placement (33-40)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=7'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=8'>Master Open</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=5'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=6'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=7'>&raquo; Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=8'>&raquo; Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=31'>&raquo; Playoff (1-16)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=32'>&raquo; Placement Pool E</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=33'>&raquo; Placement Pool F</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=37'>&raquo; Placement (17-24)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=8'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=9'>Master Women&#039;s</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=1'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=2'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=3'>&raquo; Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=4'>&raquo; Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=38'>&raquo; Power Pool E</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=39'>&raquo; Power Pool F</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=40'>&raquo; Power Pool G</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=41'>&raquo; Power Pool H</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=42'>&raquo; Playoff (1-16)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=9'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=1'>Grand Master Mixed</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=23'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=24'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=25'>&raquo; Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=26'>&raquo; Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=80'>&raquo; Power Pool E</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=81'>&raquo; Power Pool F</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=82'>&raquo; Power Pool G</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=83'>&raquo; Power Pool H</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=84'>&raquo; Pre-Quarters</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=85'>&raquo; Playoff (1-8)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=86'>&raquo; Playoff (9-16)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=1'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=2'>Grand Master Open</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=19'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=20'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=21'>&raquo; Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=22'>&raquo; Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=59'>&raquo; Power Pool E</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=60'>&raquo; Power Pool F</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=61'>&raquo; Power Pool G</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=62'>&raquo; Power Pool H</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=63'>&raquo; Pre-Quarters</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=68'>&raquo; Playoff (1-8)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=69'>&raquo; Playoff (9-16)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=2'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=3'>Grand Master Women&#039;s</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=17'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=18'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=74'>&raquo; Power Pool C</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=75'>&raquo; Power Pool D</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=76'>&raquo; Pre-Semis</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=77'>&raquo; Playoff (1-4)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=79'>&raquo; Placement (5-10)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=3'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=4'>Great Grand Master Mixed</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=30'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=102'>&raquo; Playoff (1-4)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=103'>&raquo; Placement (5-8)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=4'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=5'>Great Grand Master Open</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=28'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=29'>&raquo; Pool B</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=93'>&raquo; Pre-Quarters</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=94'>&raquo; Playoff (1-8)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=95'>&raquo; Playoff (9-12)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=5'>Spirit Scores</a></td></tr>
+<tr><td class='menuserieslevel'><a class='subnav' href='?view=seriesstatus&amp;series=6'>Great Grand Master Women&#039;s</a></td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=27'>&raquo; Pool A</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=99'>&raquo; Playoff (1-4)</a>
+</td></tr>
+<tr><td class='menupoollevel'>
+<a class='navpoollink' href='?view=poolstatus&amp;pool=100'>&raquo; Placement (5-8)</a>
+</td></tr>
+<tr><td class='menupoollevel'><a class='navpoollink' href='?view=spiritstatus&amp;series=6'>Spirit Scores</a></td></tr>
+</table>
+<table class='leftmenulinks'>
+<tr><td class='menuseasonlevel'>Event Links</td></tr>
+<tr><td></td></tr>
+<tr><td><a class='subnav' style='background: url(./images/linkicons/feed_14x14.png) no-repeat 0 50%; padding: 0 0 0 19px;' href='./ext/rss.php?feed=all'>Result Feed</a>
+</td></tr>
+</table>
+<table class='leftmenulinks'>
+<tr><td class='menuseasonlevel' width=20px></td><td class='menuseasonlevel'>Links</td><td class='menuseasonlevel' width=20px><a class='seasonnav hiddenlink' href='login'>&nbsp;</a></td></tr>
+<tr><td colspan='3'></td></tr>
+</table><table style='width:90%'>
+<tr><td class='guides'><a href='?view=user_guide'>User Guide</a> | 
+<a href='?view=privacy'>Privacy Policy</a>
+</td></tr></table></td>
+
+<td align='left' valign='top' class='tdcontent'><div class='content'>
+<h1>#24 Michael Chirlin</h1><p>Team: <a class='headerlink' href='?view=teamcard&amp;team=28'>Black Cans</a></p><table style='width:100%'><tr><td></td><td style='vertical-align:top;text-align:left'><table><tr><td></td></tr></table></td></tr></table><h2>WMUCC 2026:</h2>
+<table border='1' width='100%'><tr><th>Games</th><th>Assists</th><th>Goals</th><th>Tot.</th><th>Assist avg.</th><th>Goals avg.</th><th>Point avg.</th><th>Wins</th><th>Win-%</th></tr>
+<tr>
+	<td>9</td>
+	<td>13</td>
+	<td>17</td>
+	<td>30</td><td>1.44</td>
+	<td>1.89</td>
+	<td>3.33</td><td>5</td>
+	<td>55.6%</td></tr>
+</table>
+<p></p>
+<h2>WMUCC 2026 game events:</h2>
+<table border='1' style='width:75%'><tr><th colspan='4'><b>28.6.2026&nbsp;&nbsp;Black Cans - Lost Boyz&nbsp;
+			&nbsp;15 - 3</b></th></tr>
+<tr><td style='width:10%'>33.30</td><td style='width:10%'>7 - 2</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Aden Richards</td></tr><tr><td style='width:10%'>63.20</td><td style='width:10%'>11 - 3</td><td style='width:40%'>Robert Gillies</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>29.6.2026&nbsp;&nbsp;Black Cans - DJ Dahlem Silverbacks&nbsp;
+			&nbsp;15 - 5</b></th></tr>
+<tr><td style='width:10%'>45.05</td><td style='width:10%'>11 - 4</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Robert Gillies</td></tr><tr><td style='width:10%'>64.15</td><td style='width:10%'>15 - 5</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Matthew Gordon</td></tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>29.6.2026&nbsp;&nbsp;Black Cans - Shadows&nbsp;
+			&nbsp;11 - 15</b></th></tr>
+<tr><td style='width:10%'>13.55</td><td style='width:10%'>3 - 4</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Ernesto Ricourt</td></tr><tr><td style='width:10%'>18.25</td><td style='width:10%'>4 - 5</td><td style='width:40%'>Jarnail Bajwa</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>83.35</td><td style='width:10%'>11 - 14</td><td style='width:40%'>Jarnail Bajwa</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>30.6.2026&nbsp;&nbsp;Johnny Walker - Black Cans&nbsp;
+			&nbsp;15 - 14</b></th></tr>
+<tr><td style='width:10%'>34.25</td><td style='width:10%'>7 - 6</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Robert Gillies</td></tr><tr><td style='width:10%'>60.15</td><td style='width:10%'>10 - 9</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Robert Gillies</td></tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>1.7.2026&nbsp;&nbsp;Stout - Black Cans&nbsp;
+			&nbsp;8 - 15</b></th></tr>
+<tr><td style='width:10%'>0.05</td><td style='width:10%'>0 - 1</td><td style='width:40%'>Zack Thompson</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>7.20</td><td style='width:10%'>1 - 3</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Peter MacArthur</td></tr><tr><td style='width:10%'>22.00</td><td style='width:10%'>3 - 5</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Peter MacArthur</td></tr><tr><td style='width:10%'>81.45</td><td style='width:10%'>6 - 12</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Peter MacArthur</td></tr><tr><td style='width:10%'>99.10</td><td style='width:10%'>8 - 15</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Justin Solis</td></tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>1.7.2026&nbsp;&nbsp;Black Cans - Greyfish&nbsp;
+			&nbsp;15 - 10</b></th></tr>
+<tr><td style='width:10%'>32.15</td><td style='width:10%'>5 - 3</td><td style='width:40%'>Peter MacArthur</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>65.15</td><td style='width:10%'>11 - 7</td><td style='width:40%'>Jarnail Bajwa</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>2.7.2026&nbsp;&nbsp;Kalakala - Black Cans&nbsp;
+			&nbsp;12 - 14</b></th></tr>
+<tr><td style='width:10%'>59.05</td><td style='width:10%'>7 - 7</td><td style='width:40%'>Sean Keegan</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>86.35</td><td style='width:10%'>11 - 10</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Robert Gillies</td></tr><tr><td style='width:10%'>98.05</td><td style='width:10%'>12 - 12</td><td style='width:40%'>Sean Keegan</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>116.10</td><td style='width:10%'>12 - 14</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>3.7.2026&nbsp;&nbsp;Shadows - Black Cans&nbsp;
+			&nbsp;15 - 13</b></th></tr>
+<tr><td style='width:10%'>5.25</td><td style='width:10%'>1 - 1</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Robert Gillies</td></tr><tr><td style='width:10%'>10.55</td><td style='width:10%'>2 - 2</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>16.20</td><td style='width:10%'>3 - 3</td><td style='width:40%'>Sean Keegan</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>25.20</td><td style='width:10%'>5 - 4</td><td style='width:40%'>Aden Richards</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>49.25</td><td style='width:10%'>9 - 8</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>60.35</td><td style='width:10%'>12 - 11</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>71.25</td><td style='width:10%'>14 - 12</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table><table border='1' style='width:75%'><tr><th colspan='4'><b>3.7.2026&nbsp;&nbsp;Black Cans - Johnny Walker&nbsp;
+			&nbsp;11 - 15</b></th></tr>
+<tr><td style='width:10%'>17.10</td><td style='width:10%'>3 - 4</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+<td style='width:40%'>Calvin Oung</td></tr><tr><td style='width:10%'>38.55</td><td style='width:10%'>6 - 7</td><td style='width:40%'>Jarnail Bajwa</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr><tr><td style='width:10%'>52.15</td><td style='width:10%'>7 - 9</td><td style='width:40%'>Calvin Oung</td><td class='highlight' style='width:40%'>Michael Chirlin</td>
+</tr></table>
+</div></td></tr></table></div>
+<script>function menu_toggle() {
+    var x = document.getElementById('menu_left');
+    if (x.style.display === 'block') {
+      x.style.display = 'none';
+    } else {
+      x.style.display = 'block';
+    }
+  }</script><div class='page_bottom'></div></div></body></html>
