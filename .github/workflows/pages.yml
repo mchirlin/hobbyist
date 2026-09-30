@@ -33,11 +33,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: app/package-lock.json
+          # No cache here on purpose — a restored corrupt npm cache is itself a
+          # known trigger for the "Exit handler never called" reify crash; the
+          # Install step manages the cache explicitly instead.
+
+      - name: Pin npm (runner's bundled npm hit "Exit handler never called")
+        run: npm install -g npm@10.9.2
 
       - name: Install
-        run: npm ci
+        # npm ci crashed on the runner with "Exit handler never called!" — an
+        # npm-internal bug, not a dependency error. Clean the cache and fall
+        # back to a fresh install (still lockfile-driven) if ci crashes again.
+        run: npm ci || (npm cache clean --force && rm -rf node_modules && npm install --no-audit --no-fund)
 
       - name: Test (gate the deploy)
         run: npx vitest run
