@@ -547,3 +547,55 @@ footer code {
   letter-spacing: 0.02em;
 }
 .medal-pip.reached { color: inherit; }
+
+/* ── v1 Bird Badge (?badge) ─────────────────────────────────────────────── */
+.badge-page { max-width: 720px; }
+.badge-name-field {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.badge-name-field input {
+  display: block;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.drop-big {
+  min-height: 120px;
+  font-size: 1.05rem;
+}
+.badge-result { text-align: center; }
+.badge-svg-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 4px auto 18px;
+  max-width: 100%;
+}
+.badge-svg-wrap svg {
+  max-width: 100%;
+  height: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+.badge-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+.badge-primary {
+  background: #2f9e44;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px 22px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.badge-primary:hover { background: #2b8a3e; }
