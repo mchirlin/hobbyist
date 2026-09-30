@@ -5,11 +5,27 @@ import {
   type Connector,
 } from '../integrations/registry'
 import { registerBuiltinConnectors } from '../integrations/connectors'
+import { MICHAEL_ULTIMATE_RESULTS } from '../integrations/ultimate'
+import { MICHAEL_GEOCACHE_FINDS } from '../integrations/geocaching'
 import type { HobbyActivity } from '../integrations/activity'
 import { EphemeralConnectCard } from './EphemeralConnectCard'
 
 // Ensure the built-ins are registered before the component reads the registry.
 registerBuiltinConnectors()
+
+/** Demo payload for a `url`-kind connector's "load" button (prototype seed data). */
+function demoPayloadFor(id: string): unknown {
+  if (id === 'ultimate-results') return MICHAEL_ULTIMATE_RESULTS
+  if (id === 'geocaching') return MICHAEL_GEOCACHE_FINDS
+  return []
+}
+
+/** Button label for a `url`-kind connector. */
+function urlActionLabel(id: string): string {
+  if (id === 'ultimate-results') return 'Load my WFDF/USAU results'
+  if (id === 'geocaching') return 'Load my geocaching finds'
+  return 'Load my results'
+}
 
 interface Props {
   /** Called when a live connector produces a normalized activity. */
@@ -73,6 +89,15 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
       )}
       {c.status === 'live' && c.connect.kind === 'token' && (
         <span className="conn-action conn-disabled">Token connect — wired via the adapter (demo)</span>
+      )}
+      {c.status === 'live' && c.connect.kind === 'url' && (
+        <button
+          type="button"
+          className="conn-action conn-btn"
+          onClick={() => onActivity(c.normalize(demoPayloadFor(c.id)))}
+        >
+          {urlActionLabel(c.id)}
+        </button>
       )}
       {c.status === 'planned' && (
         <span className="conn-action conn-disabled">Not built yet</span>

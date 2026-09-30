@@ -3,8 +3,8 @@
 // registry mechanics so the registry itself stays dependency-free and testable.
 
 import { registerConnector, getConnector } from './registry'
-import { ebirdAdapter, type EbirdObservation } from './ebird'
 import { parseEbirdCsv, ebirdCsvToActivity, type EbirdCsvRow } from './ebirdCsv'
+import { ultimateAdapter, type WfdfTournamentResult } from './ultimate'
 import { levelFromThresholds, type HobbyActivity } from './activity'
 
 /** Idempotently register all built-in connectors. */
@@ -50,17 +50,32 @@ export function registerBuiltinConnectors(): void {
     },
   })
 
-  // --- eBird region API (spectrum level: api) ------------------------------
-  // Supplementary "what's around me now" signal. Token, no password.
-  registerConnector<EbirdObservation[]>({
-    id: 'ebird-api',
-    name: 'eBird — recent nearby',
-    hobby: 'Birding',
-    level: 'api',
-    connect: { kind: 'token', placeholder: 'eBird API token' },
+  // --- Geocaching (spectrum level: scrape) ---------------------------------
+  // geocaching.com publishes a public profile with a running "caches found"
+  // total (and finds have dates). No public API without a partner key, so the
+  // honest level is a public-profile read. activityCount = caches found.
+  const GEOCACHE_LEVELS = [1, 25, 100, 500, 1000]
+  interface GeocacheRaw { username?: string; finds: { name: string; date?: string; url?: string }[] }
+  registerConnector<GeocacheRaw>({
+    id: 'geocaching',
+    name: 'Geocaching — caches found',
+    hobby: 'Geocaching',
+    level: 'scrape',
+    connect: { kind: 'url', placeholder: 'Your geocaching.com profile URL or username' },
     status: 'live',
-    signal: 'Distinct species reported near you recently.',
-    normalize: ebirdAdapter.normalize,
+    signal: 'Caches you have found (from your public profile).',
+    normalize(raw): HobbyActivity {
+      const finds = raw?.finds ?? []
+      const dates = finds.map((f) => f.date ?? '').filter(Boolean).sort()
+      return {
+        hobby: 'Geocaching',
+        source: 'geocaching',
+        activityCount: finds.length,
+        level: levelFromThresholds(finds.length, GEOCACHE_LEVELS),
+        lastActive: dates[dates.length - 1],
+        evidence: finds.slice(0, 5).map((f) => ({ label: f.name, date: f.date, url: f.url })),
+      }
+    },
   })
 
   // --- YouTube uploads (spectrum level: api) — PLANNED ---------------------
@@ -92,32 +107,22 @@ export function registerBuiltinConnectors(): void {
     },
   })
 
-  // --- Ultimate results (spectrum level: scrape) — PLANNED -----------------
-  // Public tournament results page, no login. The hard, brittle corner.
-  const ULTIMATE_LEVELS = [1, 3, 6, 12, 24]
-  interface UltimateRaw { tournaments: { name: string; date?: string; finish?: string }[] }
-  registerConnector<UltimateRaw>({
+  // --- Ultimate results (spectrum level: scrape) ---------------------------
+  // WFDF championship results (results.wfdf.sport) are static, no-login pages:
+  // a per-player card carries the individual box score and a standings matrix
+  // gives team placement. USAU nationals contribute team placement only. The
+  // connector's raw input is the user's filtered tournament results (matched by
+  // player NAME, since WFDF ids are per-event); ultimateAdapter is the pure
+  // transform. Ships with a real seed fixture (MICHAEL_ULTIMATE_RESULTS) so the
+  // signal is demonstrable end-to-end today.
+  registerConnector<WfdfTournamentResult[]>({
     id: 'ultimate-results',
-    name: 'Ultimate — tournament results',
+    name: 'Ultimate — WFDF/USAU tournament results',
     hobby: 'Ultimate',
     level: 'scrape',
-    connect: { kind: 'url', placeholder: 'WFDF/USAU results page URL' },
-    status: 'planned',
-    signal: 'Tournaments your team has appeared in.',
-    normalize(raw): HobbyActivity {
-      const events = raw?.tournaments ?? []
-      const dates = events.map((e) => e.date ?? '').filter(Boolean).sort()
-      return {
-        hobby: 'Ultimate',
-        source: 'ultimate-results',
-        activityCount: events.length,
-        level: levelFromThresholds(events.length, ULTIMATE_LEVELS),
-        lastActive: dates[dates.length - 1],
-        evidence: events.slice(0, 5).map((e) => ({
-          label: e.finish ? `${e.name} — ${e.finish}` : e.name,
-          date: e.date,
-        })),
-      }
-    },
+    connect: { kind: 'url', placeholder: 'Your player name (e.g. Michael Chirlin)' },
+    status: 'live',
+    signal: 'Tournaments played, with placement and individual goals/assists.',
+    normalize: ultimateAdapter.normalize,
   })
 }

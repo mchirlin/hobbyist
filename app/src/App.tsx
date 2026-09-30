@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PatchSash } from './components/PatchSash'
+import { PlaySash } from './components/PlaySash'
 import { HobbyProgress } from './components/HobbyProgress'
 import { VideoCoachCard } from './components/VideoCoachCard'
 import { EbirdImportCard } from './components/EbirdImportCard'
@@ -13,7 +13,6 @@ import type { Profile } from './data/types'
 import type { HobbyActivity } from './integrations/activity'
 
 export default function App() {
-  const [replayKey, setReplayKey] = useState(0)
   const [baseProfile, setBaseProfile] = useState<Profile>(sampleProfile)
   const [completions, setCompletions] = useState<QuestCompletions>({})
   const [editingImportance, setEditingImportance] = useState(false)
@@ -49,11 +48,10 @@ export default function App() {
           : h,
       ),
     }))
-    setReplayKey((k) => k + 1) // replay so the resized patch animates in
   }
 
-  // Toggle a quest's completion (self-attested) and replay so a level-up
-  // lights up new pips on the sash.
+  // Toggle a quest's completion (self-attested). The sash reflects any
+  // resulting level-up on its next physics render.
   function toggleQuest(questId: string) {
     setCompletions((c) => {
       const next = { ...c }
@@ -61,7 +59,6 @@ export default function App() {
       else next[questId] = new Date().toISOString()
       return next
     })
-    setReplayKey((k) => k + 1)
   }
 
   // Explicit override: set a hobby's importance (patch size) directly.
@@ -85,16 +82,13 @@ export default function App() {
         <h2>{profile.displayName}'s Hobby Sash</h2>
         <p className="hint">
           Your hobbies as a collection of earned patches — bigger patch = bigger
-          part of your life. One shareable image.
+          part of your life. Grab a patch and fling it; they bump into each other
+          and settle.
         </p>
-        <PatchSash profile={profile} size={620} replayKey={replayKey} />
-        <button className="replay" onClick={() => setReplayKey((k) => k + 1)}>
-          ↻ Replay animation
-        </button>
+        <PlaySash profile={profile} size={620} />
         <button
           className="replay"
           onClick={() => setEditingImportance((v) => !v)}
-          style={{ marginLeft: 8 }}
         >
           {editingImportance ? '✕ Done editing' : '⚖ Edit importance'}
         </button>

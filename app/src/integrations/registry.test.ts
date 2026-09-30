@@ -70,9 +70,9 @@ describe('built-in connectors', () => {
     registerBuiltinConnectors() // second call is a no-op, not a duplicate throw
     const ids = listConnectors().map((c) => c.id).sort()
     expect(ids).toEqual([
-      'ebird-api',
       'ebird-csv',
       'ebird-ephemeral',
+      'geocaching',
       'ultimate-results',
       'youtube',
     ])
@@ -116,5 +116,41 @@ describe('built-in connectors', () => {
     expect(a.activityCount).toBe(5)
     expect(a.level).toBe(2) // >=5 uploads → level 2
     expect(a.lastActive).toBe('2026-05-01')
+  })
+
+  it('Geocaching connector is live and maps finds → count/level', () => {
+    registerBuiltinConnectors()
+    const gc = getConnector('geocaching')!
+    expect(gc.status).toBe('live')
+    expect(gc.hobby).toBe('Geocaching')
+    const a = gc.normalize({
+      username: 'demo',
+      finds: [
+        { name: 'Cache A', date: '2026-01-01' },
+        { name: 'Cache B', date: '2026-02-01' },
+      ],
+    })
+    expect(a.hobby).toBe('Geocaching')
+    expect(a.activityCount).toBe(2)
+    expect(a.lastActive).toBe('2026-02-01')
+    expect(a.evidence[0].label).toBe('Cache A')
+  })
+
+  it('Ultimate connector is live and normalizes tournament results', () => {
+    registerBuiltinConnectors()
+    const ult = getConnector('ultimate-results')!
+    expect(ult.status).toBe('live')
+    expect(ult.level).toBe('scrape')
+    expect(ult.hobby).toBe('Ultimate')
+    const a = ult.normalize([
+      {
+        tournament: 'WMUCC 2026', date: '2026-06-28', division: 'Grand Master Open',
+        team: 'Black Cans', placement: 4,
+        stats: { games: 9, assists: 13, goals: 17, total: 30, wins: 5, winPct: 55.6 },
+      },
+    ])
+    expect(a.hobby).toBe('Ultimate')
+    expect(a.activityCount).toBe(1)
+    expect(a.evidence[0].label).toContain('17G 13A')
   })
 })
