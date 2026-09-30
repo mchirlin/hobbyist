@@ -38,6 +38,12 @@ export interface ProfileHobby {
   level?: number
   /** Suggested missions to progress this hobby. */
   missions?: Mission[]
+  /**
+   * Counts for medal metrics, keyed by a medal's `metricKey`
+   * (see quests/medals.ts), e.g. { 'geocaching.finds': 12 }. Drives which
+   * medal tier is earned. A connector sync updates these; seeded for cold-start.
+   */
+  metricCounts?: Record<string, number>
 }
 
 /** The level ladder every hobby climbs. */

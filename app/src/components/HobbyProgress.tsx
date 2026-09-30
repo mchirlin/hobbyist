@@ -1,6 +1,7 @@
 import type { Profile } from '../data/types'
 import { LEVELS } from '../data/types'
 import { CATEGORY_COLOR } from '../data/sampleProfile'
+import { MedalCase } from './MedalCase'
 
 interface Props {
   profile: Profile
@@ -50,6 +51,9 @@ export function HobbyProgress({ profile }: Props) {
                 <span className="mission-text">{nextMission.text}</span>
               </div>
             )}
+
+            {/* concrete, countable medals (Pokémon-GO style) */}
+            <MedalCase hobby={h.name} counts={h.metricCounts} />
           </div>
         )
       })}
