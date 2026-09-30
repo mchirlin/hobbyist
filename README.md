@@ -230,6 +230,12 @@ real, with texture and craft.
 
 - Each hobby is an **illustrated patch**: a distinctive emblem, not an emoji,
   with stitched borders, a category color, and a merit-badge silhouette.
+  *(Implementation: the sash is **art-agnostic** via `app/src/components/art.ts` —
+  each hobby resolves to an `ArtDescriptor` through a fallback chain: a
+  registered badge image (`public/badges/*.svg`) → the hand-drawn inline emblem
+  → the emoji icon → a star. Finished art drops in with one `registerArt()`
+  line and no renderer change; `Birding` and `Ultimate` already ship real
+  full-color image badges as proof.)*
 - **Size / prominence = importance** — your signature hobbies get bigger,
   more-detailed patches placed front and center; dabbles are small pins.
 - **Level shows on the patch** — stars, a rank ring, or chevrons on the patch

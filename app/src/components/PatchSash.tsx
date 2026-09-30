@@ -4,7 +4,7 @@ import { pack, hierarchy } from 'd3-hierarchy'
 import type { Profile } from '../data/types'
 import { LEVELS } from '../data/types'
 import { CATEGORY_COLOR, CATEGORY_ARCHETYPE } from '../data/sampleProfile'
-import { EMBLEMS, STAR_EMBLEM } from './emblems'
+import { resolveArt } from './art'
 
 interface Props {
   profile: Profile
@@ -96,7 +96,7 @@ export function PatchSash({ profile, size = 640, replayKey = 0 }: Props) {
         const color = CATEGORY_COLOR[hobby.category] ?? '#868e96'
         const r = node.r
         const bumps = Math.max(10, Math.round(r / 4.5))
-        const emblem = EMBLEMS[hobby.name] ?? STAR_EMBLEM
+        const emblem = resolveArt(hobby.name, hobby.icon)
         const emblemScale = (r * 1.15) / 100
         const showLabel = r > 30
         const level = hobby.level ?? 0
@@ -131,13 +131,36 @@ export function PatchSash({ profile, size = 640, replayKey = 0 }: Props) {
               strokeWidth={Math.max(1.5, r * 0.03)}
               strokeDasharray={`${r * 0.16} ${r * 0.09}`}
             />
-            {/* emblem (illustration, centered, nudged up when labeled) */}
-            <g
-              transform={`translate(${-50 * emblemScale},${(showLabel ? -58 : -50) * emblemScale}) scale(${emblemScale})`}
-              color="#fff"
-              opacity="0.96"
-              dangerouslySetInnerHTML={{ __html: emblem }}
-            />
+            {/* emblem (illustration/image/emoji, centered, nudged up when labeled) */}
+            {emblem.kind === 'image' ? (
+              <image
+                href={emblem.href}
+                width={100 * emblemScale}
+                height={100 * emblemScale}
+                x={-50 * emblemScale}
+                y={(showLabel ? -58 : -50) * emblemScale}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                <title>{emblem.alt}</title>
+              </image>
+            ) : emblem.kind === 'emoji' ? (
+              <text
+                textAnchor="middle"
+                dominantBaseline="central"
+                y={(showLabel ? -8 : 0)}
+                fontSize={r * 0.6}
+                style={{ userSelect: 'none' }}
+              >
+                {emblem.glyph}
+              </text>
+            ) : (
+              <g
+                transform={`translate(${-50 * emblemScale},${(showLabel ? -58 : -50) * emblemScale}) scale(${emblemScale})`}
+                color="#fff"
+                opacity="0.96"
+                dangerouslySetInnerHTML={{ __html: emblem.svg }}
+              />
+            )}
             {/* hobby name */}
             {showLabel && (
               <text
