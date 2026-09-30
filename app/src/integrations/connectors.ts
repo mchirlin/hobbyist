@@ -30,6 +30,26 @@ export function registerBuiltinConnectors(): void {
     },
   })
 
+  // --- eBird ephemeral login (spectrum level: ephemeral) ------------------
+  // The no-store credential model: the user supplies credentials for ONE run,
+  // the automation uses them in memory, then discards them. In this app the
+  // credentials arrive via ctx (never stored); the runner side that actually
+  // drives a headless browser lives in scripts/ephemeral-sync/run.mjs and would
+  // hand back the same MyEBirdData.csv text this normalize() parses.
+  registerConnector<string>({
+    id: 'ebird-ephemeral',
+    name: 'eBird — one-shot login sync',
+    hobby: 'Birding',
+    level: 'ephemeral',
+    connect: { kind: 'credentials' },
+    status: 'live',
+    signal: 'Your life list, fetched via a login you re-enter each sync.',
+    normalize(rawText: string): HobbyActivity {
+      const rows: EbirdCsvRow[] = parseEbirdCsv(rawText)
+      return ebirdCsvToActivity(rows)
+    },
+  })
+
   // --- eBird region API (spectrum level: api) ------------------------------
   // Supplementary "what's around me now" signal. Token, no password.
   registerConnector<EbirdObservation[]>({

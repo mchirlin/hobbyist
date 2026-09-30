@@ -6,6 +6,7 @@ import {
 } from '../integrations/registry'
 import { registerBuiltinConnectors } from '../integrations/connectors'
 import type { HobbyActivity } from '../integrations/activity'
+import { EphemeralConnectCard } from './EphemeralConnectCard'
 
 // Ensure the built-ins are registered before the component reads the registry.
 registerBuiltinConnectors()
@@ -66,6 +67,9 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
             style={{ display: 'none' }}
           />
         </label>
+      )}
+      {c.status === 'live' && c.connect.kind === 'credentials' && (
+        <EphemeralConnectCard connector={c} onActivity={onActivity} />
       )}
       {c.status === 'live' && c.connect.kind === 'token' && (
         <span className="conn-action conn-disabled">Token connect — wired via the adapter (demo)</span>

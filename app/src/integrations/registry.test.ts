@@ -65,11 +65,26 @@ describe('connector registry', () => {
 describe('built-in connectors', () => {
   beforeEach(() => _resetRegistry())
 
-  it('registers all four built-ins idempotently', () => {
+  it('registers all built-ins idempotently', () => {
     registerBuiltinConnectors()
     registerBuiltinConnectors() // second call is a no-op, not a duplicate throw
     const ids = listConnectors().map((c) => c.id).sort()
-    expect(ids).toEqual(['ebird-api', 'ebird-csv', 'ultimate-results', 'youtube'])
+    expect(ids).toEqual([
+      'ebird-api',
+      'ebird-csv',
+      'ebird-ephemeral',
+      'ultimate-results',
+      'youtube',
+    ])
+  })
+
+  it('the ephemeral connector is a no-store credential connector', () => {
+    registerBuiltinConnectors()
+    const eph = getConnector('ebird-ephemeral')!
+    expect(eph.level).toBe('ephemeral')
+    expect(eph.connect.kind).toBe('credentials')
+    // The design invariant: an ephemeral connector never stores a credential.
+    expect(AUTOMATION_META.ephemeral.storesCredential).toBe(false)
   })
 
   it('eBird CSV connector normalizes raw CSV text end-to-end', () => {
