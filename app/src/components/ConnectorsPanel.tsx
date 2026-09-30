@@ -7,17 +7,22 @@ import {
 import { registerBuiltinConnectors } from '../integrations/connectors'
 import { syncUltimateResults } from '../integrations/ultimate'
 import { MICHAEL_GEOCACHE_FINDS } from '../integrations/geocaching'
+import { syncGeocachingProfile } from '../integrations/geocachingParse'
 import type { HobbyActivity } from '../integrations/activity'
 import { EphemeralConnectCard } from './EphemeralConnectCard'
 
 // Ensure the built-ins are registered before the component reads the registry.
 registerBuiltinConnectors()
 
-/** Optional CORS proxy for browser-side scrape fetches (e.g. results.wfdf.sport,
- * which sends no CORS headers). Set VITE_WFDF_PROXY to "https://my-proxy/?u=".
- * When unset, the live fetch fails in the browser and the connector falls back
- * to seed data — the parse is real either way. */
-const WFDF_PROXY = (import.meta.env.VITE_WFDF_PROXY as string | undefined) || undefined
+/** Optional CORS proxy for browser-side scrape fetches (results.wfdf.sport and
+ * www.geocaching.com send no CORS headers). Set VITE_SCRAPE_PROXY to
+ * "https://my-proxy/?u=" (VITE_WFDF_PROXY kept as a back-compat alias). When
+ * unset, the live fetch fails in the browser and the connector falls back to
+ * seed data — the parse is real either way, and works live server-side. */
+const SCRAPE_PROXY =
+  (import.meta.env.VITE_SCRAPE_PROXY as string | undefined) ||
+  (import.meta.env.VITE_WFDF_PROXY as string | undefined) ||
+  undefined
 
 interface Props {
   /** Called when a live connector produces a normalized activity. */
@@ -55,24 +60,35 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
     reader.readAsText(file)
   }
 
-  // Run a `url`-kind connector's sync. Ultimate attempts a REAL fetch of
-  // results.wfdf.sport (via VITE_WFDF_PROXY in the browser) and reports whether
-  // it got live data or fell back to seed. Geocaching uses its demo fixture.
+  // Run a `url`-kind connector's sync. Both attempt a REAL fetch (via
+  // VITE_SCRAPE_PROXY in the browser, directly server-side) and report whether
+  // they got live data or fell back to seed. Ultimate hits results.wfdf.sport;
+  // Geocaching hits the geocaching.com public profile (souvenir count is public;
+  // the find total is auth-gated, so finds stay seed-derived).
   async function onUrlSync() {
     setBusy(true)
     setStatus(null)
     try {
       if (c.id === 'ultimate-results') {
-        const { results, live } = await syncUltimateResults({ proxyBase: WFDF_PROXY })
+        const { results, live } = await syncUltimateResults({ proxyBase: SCRAPE_PROXY })
         onActivity(c.normalize(results))
         setStatus(
           live
             ? `Fetched live from results.wfdf.sport — ${results.length} tournaments.`
-            : `Loaded ${results.length} tournaments (seed — set VITE_WFDF_PROXY for live browser fetch).`,
+            : `Loaded ${results.length} tournaments (seed — set VITE_SCRAPE_PROXY for live browser fetch).`,
         )
       } else if (c.id === 'geocaching') {
-        onActivity(c.normalize(MICHAEL_GEOCACHE_FINDS))
-        setStatus(`Loaded ${MICHAEL_GEOCACHE_FINDS.finds.length} finds (demo).`)
+        const { profile, live, souvenirsCount } = await syncGeocachingProfile(
+          MICHAEL_GEOCACHE_FINDS,
+          MICHAEL_GEOCACHE_FINDS.username,
+          { proxyBase: SCRAPE_PROXY },
+        )
+        onActivity(c.normalize(profile))
+        setStatus(
+          live
+            ? `Verified live at geocaching.com/${profile.username} — ${souvenirsCount ?? 0} souvenirs public; ${MICHAEL_GEOCACHE_FINDS.finds.length} finds (find total is auth-gated).`
+            : `Loaded ${MICHAEL_GEOCACHE_FINDS.finds.length} finds (seed — public profile fetch needs VITE_SCRAPE_PROXY in the browser).`,
+        )
       }
     } catch (err) {
       setStatus('Sync failed — see console.')
@@ -120,7 +136,7 @@ function ConnectorRow({ c, onActivity }: { c: Connector; onActivity: Props['onAc
             onClick={onUrlSync}
             disabled={busy}
           >
-            {busy ? 'Syncing…' : c.id === 'geocaching' ? 'Load my geocaching finds' : 'Sync my results (live)'}
+            {busy ? 'Syncing…' : c.id === 'geocaching' ? 'Sync my profile (live)' : 'Sync my results (live)'}
           </button>
           {status && <p className="conn-note" style={{ marginTop: 6 }}>{status}</p>}
         </>

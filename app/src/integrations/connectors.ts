@@ -51,9 +51,12 @@ export function registerBuiltinConnectors(): void {
   })
 
   // --- Geocaching (spectrum level: scrape) ---------------------------------
-  // geocaching.com publishes a public profile with a running "caches found"
-  // total (and finds have dates). No public API without a partner key, so the
-  // honest level is a public-profile read. activityCount = caches found.
+  // geocaching.com/p/?u=<user> is a real public profile (200 vs 404 "DNF").
+  // BUT the initial HTML only exposes the SOUVENIR count publicly; the caches-
+  // found total loads from an authenticated API (/api/proxy/... -> 401), so it
+  // is NOT scrapable without a login/partner key. geocachingParse.ts fetches +
+  // parses what is honestly public (existence + souvenirs) and keeps the find
+  // LOG seed-derived. activityCount = caches found (from the seed log for now).
   const GEOCACHE_LEVELS = [1, 25, 100, 500, 1000]
   interface GeocacheRaw { username?: string; finds: { name: string; date?: string; url?: string }[] }
   registerConnector<GeocacheRaw>({
