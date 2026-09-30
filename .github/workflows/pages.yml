@@ -37,23 +37,26 @@ jobs:
           # known trigger for the "Exit handler never called" reify crash; the
           # Install step manages the cache explicitly instead.
 
-      - name: Pin npm (runner's bundled npm hit "Exit handler never called")
-        run: npm install -g npm@10.9.2
+      - name: Install pnpm
+        # npm's reify crashed on this runner with "Exit handler never called!"
+        # on BOTH `npm ci` and a clean `npm install` — an npm-internal bug, not
+        # a dependency error. pnpm is a different resolver and installs cleanly
+        # from package.json (no committed pnpm lockfile needed).
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Install
-        # npm ci crashed on the runner with "Exit handler never called!" — an
-        # npm-internal bug, not a dependency error. Clean the cache and fall
-        # back to a fresh install (still lockfile-driven) if ci crashes again.
-        run: npm ci || (npm cache clean --force && rm -rf node_modules && npm install --no-audit --no-fund)
+        run: pnpm install --no-frozen-lockfile
 
       - name: Test (gate the deploy)
-        run: npx vitest run
+        run: pnpm exec vitest run
 
       - name: Build
         env:
           # Pages serves a project site under /<repo>/ — assets must resolve there.
           VITE_BASE: /hobbyist/
-        run: npm run build
+        run: pnpm run build
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
