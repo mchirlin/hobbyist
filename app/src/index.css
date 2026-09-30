@@ -181,3 +181,91 @@ footer code {
 .feedback li.fix { background: #fff4e6; }
 .ts { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--muted); font-size: 0.8rem; min-width: 30px; }
 .score { font-size: 0.9rem; color: var(--ink); background: #f1f3f5; padding: 10px 12px; border-radius: 8px; margin: 0; }
+
+/* ---- Quest board (the active engine) ---- */
+.quest-board { display: flex; flex-direction: column; gap: 18px; }
+
+.quest-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.quest-group-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.quest-group-blurb { color: var(--muted); font-size: 0.8rem; }
+
+.quest-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  transition: background 0.15s, opacity 0.15s;
+}
+.quest-item.done { background: #f1f3f5; opacity: 0.7; }
+.quest-item.done .quest-text { text-decoration: line-through; }
+
+.quest-check { position: relative; display: inline-flex; cursor: pointer; }
+.quest-check input { position: absolute; opacity: 0; width: 0; height: 0; }
+.quest-box {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--muted);
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #fff;
+  transition: background 0.15s;
+}
+.quest-item.done .quest-box { background: currentColor; }
+
+.quest-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.quest-text { font-size: 0.92rem; }
+.quest-meta { display: flex; gap: 10px; align-items: center; font-size: 0.75rem; }
+.quest-hobby { font-weight: 700; }
+.quest-xp { color: var(--muted); font-weight: 600; }
+
+/* per-hobby XP progress */
+.quest-progress {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  margin-top: 4px;
+}
+.quest-progress h3 { margin: 0 0 2px; font-size: 0.95rem; }
+.quest-progress-row { margin-bottom: 12px; }
+.qpr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.qpr-head .progress-name { flex: 1; }
+.qpr-xp { color: var(--muted); font-size: 0.78rem; font-weight: 600; }
+.qpr-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+.qpr-fill { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+.qpr-next { font-size: 0.72rem; color: var(--muted); margin-top: 4px; }
+
+/* ---- Importance editor (cold-start + override) ---- */
+.importance-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+.importance-editor { display: flex; flex-direction: column; gap: 8px; }
+.imp-row { display: flex; align-items: center; gap: 10px; }
+.imp-icon { width: 1.4rem; text-align: center; }
+.imp-name { flex: 0 0 120px; font-weight: 600; font-size: 0.9rem; }
+.imp-slider { flex: 1; cursor: pointer; }
+.imp-val { flex: 0 0 1.5rem; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }

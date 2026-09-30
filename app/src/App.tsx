@@ -1,20 +1,41 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { PatchSash } from './components/PatchSash'
 import { HobbyProgress } from './components/HobbyProgress'
 import { VideoCoachCard } from './components/VideoCoachCard'
 import { EbirdImportCard } from './components/EbirdImportCard'
+import { QuestBoard } from './components/QuestBoard'
+import { ImportanceEditor } from './components/ImportanceEditor'
 import { sampleProfile } from './data/sampleProfile'
+import { sampleQuests } from './quests/sampleQuests'
+import { hobbyXp, levelFromXp, type QuestCompletions } from './quests/quests'
 import type { Profile } from './data/types'
 import type { HobbyActivity } from './integrations/activity'
 
 export default function App() {
   const [replayKey, setReplayKey] = useState(0)
-  const [profile, setProfile] = useState<Profile>(sampleProfile)
+  const [baseProfile, setBaseProfile] = useState<Profile>(sampleProfile)
+  const [completions, setCompletions] = useState<QuestCompletions>({})
+  const [editingImportance, setEditingImportance] = useState(false)
+
+  // The profile that actually drives the sash: base levels raised by quest XP.
+  // Quests never LOWER a hobby (max of base and quest-derived level), so the
+  // passive signal and the active engine compose instead of fighting.
+  const profile = useMemo<Profile>(() => {
+    return {
+      ...baseProfile,
+      hobbies: baseProfile.hobbies.map((h) => {
+        const xp = hobbyXp(sampleQuests, completions, h.name)
+        if (xp === 0) return h
+        const questLevel = levelFromXp(xp)
+        return { ...h, level: Math.max(h.level ?? 0, questLevel) }
+      }),
+    }
+  }, [baseProfile, completions])
 
   // Apply a synced activity signal to the matching hobby: level from the
   // adapter, importance scaled from the activity magnitude (capped 1–10).
   function applyActivity(a: HobbyActivity) {
-    setProfile((p) => ({
+    setBaseProfile((p) => ({
       ...p,
       hobbies: p.hobbies.map((h) =>
         h.name === a.hobby
@@ -28,6 +49,28 @@ export default function App() {
       ),
     }))
     setReplayKey((k) => k + 1) // replay so the resized patch animates in
+  }
+
+  // Toggle a quest's completion (self-attested) and replay so a level-up
+  // lights up new pips on the sash.
+  function toggleQuest(questId: string) {
+    setCompletions((c) => {
+      const next = { ...c }
+      if (next[questId]) delete next[questId]
+      else next[questId] = new Date().toISOString()
+      return next
+    })
+    setReplayKey((k) => k + 1)
+  }
+
+  // Explicit override: set a hobby's importance (patch size) directly.
+  function setImportance(hobby: string, importance: number) {
+    setBaseProfile((p) => ({
+      ...p,
+      hobbies: p.hobbies.map((h) =>
+        h.name === hobby ? { ...h, importance } : h,
+      ),
+    }))
   }
 
   return (
@@ -47,6 +90,37 @@ export default function App() {
         <button className="replay" onClick={() => setReplayKey((k) => k + 1)}>
           ↻ Replay animation
         </button>
+        <button
+          className="replay"
+          onClick={() => setEditingImportance((v) => !v)}
+          style={{ marginLeft: 8 }}
+        >
+          {editingImportance ? '✕ Done editing' : '⚖ Edit importance'}
+        </button>
+        {editingImportance && (
+          <div className="importance-panel">
+            <p className="hint">
+              Drag to set how big a part of your life each hobby is — the sash
+              rebalances live. (Auto-sync will set these for you later; this is
+              the cold-start + override path.)
+            </p>
+            <ImportanceEditor profile={profile} onChange={setImportance} />
+          </div>
+        )}
+      </section>
+
+      <section className="ranked">
+        <h2>Quests</h2>
+        <p className="hint">
+          The active engine — complete daily, weekly, and monthly challenges to
+          earn XP and level up a patch. No account connection needed.
+        </p>
+        <QuestBoard
+          profile={profile}
+          quests={sampleQuests}
+          completions={completions}
+          onToggle={toggleQuest}
+        />
       </section>
 
       <section className="ranked">
@@ -65,7 +139,7 @@ export default function App() {
 
       <footer>
         Prototype · edit <code>src/data/sampleProfile.ts</code> to change the
-        hobbies and weights, and the cloud rebalances.
+        hobbies and weights, and the sash rebalances.
       </footer>
     </main>
   )
