@@ -269,3 +269,53 @@ footer code {
 .imp-name { flex: 0 0 120px; font-weight: 600; font-size: 0.9rem; }
 .imp-slider { flex: 1; cursor: pointer; }
 .imp-val { flex: 0 0 1.5rem; text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+/* ---- Connectors panel (the passive engine catalog) ---- */
+.connectors-panel { text-align: left; }
+.conn-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ranked li.conn-row {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--card);
+}
+.conn-row.conn-planned { opacity: 0.7; }
+.conn-head { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.conn-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.conn-name { font-weight: 700; font-size: 0.95rem; }
+.conn-level {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--line);
+  color: var(--ink);
+  white-space: nowrap;
+}
+.conn-level-api    { background: #d3f9d8; color: #2b8a3e; }
+.conn-level-email  { background: #d0ebff; color: #1971c2; }
+.conn-level-extension { background: #e5dbff; color: #6741d9; }
+.conn-level-ephemeral { background: #fff3bf; color: #e67700; }
+.conn-level-scrape { background: #ffe3e3; color: #c92a2a; }
+.conn-level-manual { background: var(--line); color: var(--muted); }
+.conn-auto { font-size: 0.68rem; color: var(--muted); font-weight: 600; margin-left: 4px; }
+.conn-planned {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted);
+}
+.conn-signal { margin: 6px 0 2px; font-size: 0.88rem; }
+.conn-note { margin: 0 0 8px; font-size: 0.78rem; color: var(--muted); }
+.conn-action { display: inline-block; }
+.conn-btn {
+  display: inline-block;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--bg);
+}
+.conn-btn:hover { border-color: var(--muted); }
+.conn-disabled { font-size: 0.78rem; color: var(--muted); font-style: italic; }

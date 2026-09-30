@@ -3,6 +3,7 @@ import { PatchSash } from './components/PatchSash'
 import { HobbyProgress } from './components/HobbyProgress'
 import { VideoCoachCard } from './components/VideoCoachCard'
 import { EbirdImportCard } from './components/EbirdImportCard'
+import { ConnectorsPanel } from './components/ConnectorsPanel'
 import { QuestBoard } from './components/QuestBoard'
 import { ImportanceEditor } from './components/ImportanceEditor'
 import { sampleProfile } from './data/sampleProfile'
@@ -121,6 +122,16 @@ export default function App() {
           completions={completions}
           onToggle={toggleQuest}
         />
+      </section>
+
+      <section className="ranked">
+        <h2>Connectors</h2>
+        <p className="hint">
+          The passive engine — each source feeds the sash at the highest
+          automation level it allows. Live ones work now; planned ones show
+          where the framework is going.
+        </p>
+        <ConnectorsPanel onActivity={applyActivity} />
       </section>
 
       <section className="ranked">

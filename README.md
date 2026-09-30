@@ -490,6 +490,17 @@ mechanism the source allows; never store a password when an API or email-export
 path exists; be transparent in-app about each source's freshness and method;
 degrade gracefully to manual.
 
+**Implementation (prototype):** the spectrum is now backed by a real connector
+registry — `app/src/integrations/registry.ts` defines the `Connector` shape
+(id, hobby, automation `level`, `connect` method, `status`, and a pure
+`normalize` step) and the `AUTOMATION_META` table that gives each level its
+honest label (set-and-forget? stores a credential?). `app/src/integrations/connectors.ts`
+registers the built-ins: eBird CSV (live, manual→email), eBird region API
+(live, api), YouTube uploads (planned, api) and Ultimate results (planned,
+scrape). The **Connectors** panel in the app enumerates the registry and renders
+each source with its spectrum badge — new sources plug in by registering a
+connector, with no UI special-casing.
+
 ---
 
 ## Integrations & Marketplaces
