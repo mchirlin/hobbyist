@@ -7,11 +7,12 @@ import { registerBadgeArt } from './components/badgeArt'
 
 registerBadgeArt()
 
-// v1 lives at ?badge — the single-hobby eBird life-list badge (the sharpest
-// cut, see ASSESSMENT.md). The full multi-hobby prototype stays at the root
-// while we validate whether the badge actually spreads.
-const isBadge = new URLSearchParams(window.location.search).has('badge')
+// v1 IS the badge — the single-hobby eBird life-list badge (the sharpest cut,
+// see ASSESSMENT.md) is the default, so a shared link is a clean URL. The full
+// multi-hobby prototype is parked at ?full while we validate whether the badge
+// spreads.
+const isFull = new URLSearchParams(window.location.search).has('full')
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>{isBadge ? <BirdBadge /> : <App />}</StrictMode>,
+  <StrictMode>{isFull ? <App /> : <BirdBadge />}</StrictMode>,
 )
