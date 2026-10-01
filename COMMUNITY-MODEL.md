@@ -270,3 +270,59 @@ them *as a sash together* — because consistency across patches, not any single
 image, is the thing to judge. No app wiring, no backend yet; just prove a style
 is good enough to build the pipeline around. Then wire the winning style through
 `registerInlineArt`/`registerArt` and persist to `HobbyDefinition.emblem`.
+
+### §7.1 — POC outcome (2026-10-01, SETTLED)
+
+The style spike ran end to end. Vendor, model, generation recipe, and the tier
+ladder are now decided. Nothing below is built in the app yet — this is the
+design conclusion the productionization work should implement.
+
+**Vendor & model — proven working.**
+- **AWS Bedrock + Stability AI**, region **`us-west-2`**, via the `hobbyist` AWS
+  profile (account `564112989632`, user `kiro-crew`).
+- **Model: `stability.stable-image-core-v1:1`** (Stable Image Core). It was the
+  consistency winner over Stable Image Ultra and SD 3.5 Large — Core reliably
+  produces a bordered circular badge; Ultra/SD3.5 drifted between framed and
+  borderless, which breaks a sash of many patches.
+- One-time **AWS Marketplace subscription** is done (Stability models are
+  Marketplace offerings; first invoke per model requires `aws-marketplace:Subscribe`,
+  which was granted once). `kiro-crew` can now invoke freely.
+- Bedrock Stability does **NOT** emit a transparent alpha channel even when
+  prompted (returns RGB, white background). So: no transparent-PNG path — handle
+  circular cropping at display time (CSS/SVG circle clip) or via the separate
+  remove-background editing model.
+
+**Generation recipe — what made it reliable.**
+- **Seed-locked** (`seed` fixed per hobby) keeps the emblem near-identical across
+  the four variants of the same tier-family, so only the border changes.
+- **Hex-anchored colors + negative prompt** are mandatory. Loose color words
+  drift (e.g. "pale platinum" rendered green). Pin an explicit metal/gem name AND
+  a hex value, and add a negative prompt excluding the stray colors.
+- **Concrete, singular motifs — never the raw hobby name.** Vague/compound
+  motifs produce gremlins ("binoculars motif" → binoculars fused to the beak;
+  "glowing object" → eye-like blobs). Each hobby needs a curated subject phrase
+  (admin-editable), fed into a locked style suffix.
+
+**Tier ladder — DECIDED, two media.** The medium itself changes as you ascend —
+cloth → treasure — so a promotion is visible at a glance across the sash.
+- **Copper · Silver · Gold** → **embroidered patch** (matte fabric, satin-stitch,
+  metal-thread merrowed border). The "earned through doing" climb.
+- **Emerald · Ruby · Diamond** → **jeweled enamel medallion** (glossy vitreous
+  enamel, polished metal setting, faceted gemstones, high gloss — explicitly NOT
+  fabric/stitching). The prestige tiers.
+- Rejected along the way: platinum (indistinguishable from silver); gem-studded
+  *stitched rims* (jewels fought the stitch edge — confusing); an app-drawn SVG
+  tier ring (double-border seam, texture never matched the AI emblem).
+
+**Not built (productionization backlog):**
+1. The two StyleRecipes as code (see `badge-style-recipes.md`) — a locked prompt
+   template + params per medium/tier.
+2. The six-tier model on `HobbyDefinition` / `BadgeDef` (one generated image per
+   tier, authored once).
+3. The server-side proxy that holds the AWS creds and runs `invoke-model`
+   (same backend commitment as §6 step 3 — the browser can't hold the key).
+4. The admin "generate a few, pick one" authoring flow.
+
+**Evidence:** spike images under `spike-patches/` (gitignored): `v2/` (clean
+emblems), `seedtier2/` (hardened metal tiers), `medium/` (the final stitched-vs-
+jewel comparison).
