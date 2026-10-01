@@ -110,6 +110,27 @@ flow, and the medals as "v2" to ship a testable single badge. But for *this*
 market, the sash-as-collection-case **is v1** — breadth is the whole point, and
 a single badge can't express breadth.
 
+## Connector roadmap (candidate sources)
+
+Declared hobbies create demand for connectors. Captured ideas, with an honest
+read on how automatic each can realistically be (the enrich half must be
+near-effortless or it never fires):
+
+| Hobby | Source(s) | Likely automation | Notes |
+|---|---|---|---|
+| Birding | eBird CSV | ✅ real today | The beachhead. |
+| Ultimate | WFDF / USAU | ⚠️ needs proxy | Server-side works; CORS-blocked in browser. |
+| Geocaching | geocaching.com | ⚠️ partial | Souvenirs public; find total auth-gated. |
+| **Foodie** | **Yelp** | ⚠️ scrape / API | Public profile (reviews, check-ins) is scrapable but CORS-walled; Yelp Fusion API is business data, not a user's review history — a user export or scrape+proxy is the real path. Metric: reviews written / places visited. |
+| **Vacation** | **TripAdvisor, Kayak** | ⚠️ scrape / mixed | TripAdvisor public profile (reviews, cities, "countries visited") is a strong collector metric but scrape+proxy, no open API. Kayak has no public profile API — likely email-export (itineraries) or manual. Metric: countries / cities visited, trips logged. |
+| YouTube | YouTube Data API | 🔜 OAuth | Planned; genuinely automatic once OAuth lands. |
+
+The pattern holds across all of them: the richest signal is behind CORS, auth,
+or an export — which is why the **CORS proxy** is the single highest-leverage
+unlock, and **OAuth** (Strava-style) is the flagship "connect once, keeps
+pulling" experience. Declare-first means every one of these can ship as an empty
+patch *now* and get its connector later.
+
 ## v1 for the Renaissance-collector thesis
 
 > **"Collect everything you're into. Tap to add a hobby instantly; connect real
