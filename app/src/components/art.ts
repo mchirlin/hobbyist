@@ -22,20 +22,32 @@ export type ArtDescriptor =
 // prototype ships with hand-drawn SVGs; this is where finished art plugs in,
 // e.g. registerArt('Birding', '/badges/birding.svg', 'Embroidered bird patch').
 const ART_IMAGES = new Map<string, { href: string; alt: string }>()
+// Inline SVG markup registered per hobby. Preferred over an external image for
+// the share badge: inline markup renders live AND survives SVG→canvas→PNG
+// serialization, whereas an external <image href> fails to load inside the
+// detached data-URL image used for PNG export (and 404s under a deployed base
+// path). resolveArt prefers an inline registration over an external image.
+const ART_INLINE = new Map<string, string>()
 
 /** Register (or override) a real badge image for a hobby. */
 export function registerArt(hobby: string, href: string, alt?: string): void {
   ART_IMAGES.set(hobby, { href, alt: alt ?? `${hobby} badge` })
 }
 
+/** Register (or override) inline SVG markup for a hobby (export-safe). */
+export function registerInlineArt(hobby: string, svg: string): void {
+  ART_INLINE.set(hobby, svg)
+}
+
 /** Remove a registered image (test helper / revert to fallback). */
 export function unregisterArt(hobby: string): void {
   ART_IMAGES.delete(hobby)
+  ART_INLINE.delete(hobby)
 }
 
 /** Which hobbies currently have real art registered. */
 export function hobbiesWithArt(): string[] {
-  return [...ART_IMAGES.keys()]
+  return [...new Set([...ART_IMAGES.keys(), ...ART_INLINE.keys()])]
 }
 
 /**
@@ -43,6 +55,9 @@ export function hobbiesWithArt(): string[] {
  * `icon` is the profile hobby's emoji (used only if there's no image/emblem).
  */
 export function resolveArt(hobby: string, icon?: string): ArtDescriptor {
+  const inline = ART_INLINE.get(hobby)
+  if (inline) return { kind: 'inline-svg', svg: inline }
+
   const image = ART_IMAGES.get(hobby)
   if (image) return { kind: 'image', href: image.href, alt: image.alt }
 

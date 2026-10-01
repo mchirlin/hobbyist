@@ -1,5 +1,11 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { resolveArt, registerArt, unregisterArt, hobbiesWithArt } from './art'
+import {
+  resolveArt,
+  registerArt,
+  registerInlineArt,
+  unregisterArt,
+  hobbiesWithArt,
+} from './art'
 
 describe('badge-art fallback chain', () => {
   beforeEach(() => {
@@ -11,6 +17,13 @@ describe('badge-art fallback chain', () => {
     registerArt('Birding', '/badges/birding.svg', 'bird')
     const art = resolveArt('Birding', '🐦')
     expect(art).toEqual({ kind: 'image', href: '/badges/birding.svg', alt: 'bird' })
+  })
+
+  it('prefers inline SVG over an external image (export-safe path)', () => {
+    registerArt('Birding', '/badges/birding.svg', 'bird')
+    registerInlineArt('Birding', '<svg><path/></svg>')
+    const art = resolveArt('Birding', '🐦')
+    expect(art).toEqual({ kind: 'inline-svg', svg: '<svg><path/></svg>' })
   })
 
   it('falls back to the hand-drawn inline emblem', () => {
