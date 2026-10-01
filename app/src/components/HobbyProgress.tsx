@@ -8,10 +8,12 @@ import {
 import {
   slugify,
   levelNamesFromDefinition,
+  missionsFromDefinition,
 } from '../data/hobbyDefinition'
 import { MedalCase } from './MedalCase'
 import { HobbyEditor } from './HobbyEditor'
 import { LevelLadderEditor } from './LevelLadderEditor'
+import { MissionEditor } from './MissionEditor'
 
 interface Props {
   profile: Profile
@@ -50,9 +52,20 @@ export function HobbyProgress({ profile }: Props) {
         const rungNames = def ? levelNamesFromDefinition(def) : [...LEVELS]
         // Clamp the stored level into the (possibly re-authored) ladder range.
         const level = Math.min(h.level ?? 0, rungNames.length - 1)
+        // Prefer the definition's AUTHORED missions (admin-editable); fall back
+        // to the profile seed. Done-state lives on the profile, so match by text.
+        const doneTexts = new Set(
+          (h.missions ?? []).filter((m) => m.done).map((m) => m.text),
+        )
+        const authored = def ? missionsFromDefinition(def) : []
+        const missionPool = (authored.length > 0 ? authored : h.missions ?? []).map((m) => ({
+          text: m.text,
+          level: m.level,
+          done: 'done' in m ? Boolean(m.done) : doneTexts.has(m.text),
+        }))
         const nextMission =
-          h.missions?.find((m) => !m.done && m.level >= level) ??
-          h.missions?.find((m) => !m.done)
+          missionPool.find((m) => !m.done && m.level >= level) ??
+          missionPool.find((m) => !m.done)
         return (
           <div className="progress-card" key={h.name}>
             <div className="progress-head">
@@ -95,9 +108,10 @@ export function HobbyProgress({ profile }: Props) {
             />
 
             {/* authoring surfaces (admin, local in step 1):
-                name your own rungs + author a milestone badge */}
+                name your own rungs + author missions + author a milestone badge */}
             <div className="authoring-row">
               <LevelLadderEditor hobby={h.name} />
+              <MissionEditor hobby={h.name} />
               <HobbyEditor hobby={h.name} />
             </div>
           </div>

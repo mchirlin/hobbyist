@@ -212,3 +212,61 @@ This is the platform commitment flagged in `CONNECTORS.md`, stated plainly:
 3. **Leaderboards per hobby?** They make metric badges competitive (great for the
    collector), but add a comparison axis that can feel like pressure for the
    abandon-friendly ADHD market. In or out of v1 of the community layer?
+
+---
+
+## §7 — AI badge-art generator (next big build)
+
+**The ask:** a good AI image generator, in a chosen house style, that mints the
+badge/patch artwork for a hobby *and* for individual accomplishments (medals,
+milestones) within it. This is the piece that turns the collection from "a
+number in a frame" into a genuinely desirable, show-it-off artifact — directly
+on-thesis for the ADHD collector-learner (novel art per new patch = the dopamine
+hit; a distinct earned-medal illustration = a trophy worth screenshotting).
+
+### Why the codebase is already shaped for this
+The art pipeline (`components/art.ts`) is **art-agnostic by design** — it was
+built as the seam for exactly this. `resolveArt(hobby, icon)` walks a fallback
+chain and returns a tagged `ArtDescriptor`; the sash renderer paints whatever it
+gets. So an AI generator does not touch the renderer at all — it only needs to:
+1. produce art for a hobby/accomplishment, then
+2. call `registerInlineArt(name, svg)` (preferred — renders live AND survives
+   the SVG→canvas→PNG export, and has no base-path dependency) or
+   `registerArt(name, href)` for a hosted raster.
+
+Persisted home: `HobbyDefinition.emblem` already exists (currently an emoji or
+inline-svg key). Generated art should be stored against the definition (and, for
+accomplishments, against the `BadgeDef`), so it is community-owned and travels
+with the hobby — not a per-session throwaway.
+
+### The hard decisions (fork, to settle before building)
+- **House style is the whole product.** The generator is only as good as a
+  *consistent, recognizable* style — a sash of 20 patches in 20 different styles
+  looks like clip-art, not a collection. Options: (a) a fine-tuned / LoRA model
+  pinned to one embroidered-patch look; (b) a heavily-engineered style prompt
+  prefix + negative prompt against a general model; (c) a curated SVG motif
+  library the model only *composes*. (a) is the strongest identity and the most
+  setup; (b) is fastest to try; (c) keeps everything inline-SVG + export-safe.
+- **Raster vs. vector.** The pipeline prefers inline SVG (export-safe, base-path
+  independent). Most image models emit raster PNGs — which means either hosting
+  them (a backend/CDN + the base-path care we already hit once) or vectorizing.
+  An SVG-native or SVG-post-processed path keeps the export story clean.
+- **Where it runs.** Image models need an API key and a server — this is the
+  same backend commitment as the community layer (§6 step 3), plus per-image
+  cost. A client-only app cannot hold the key. So this likely lands *with* the
+  backend, not before it. Interim: a "generate" button that calls a thin proxy
+  endpoint (the same CORS-proxy shape the connectors want).
+- **Cost + abuse control.** Generation costs money per image; an admin minting
+  art for a community hobby, or a user re-rolling endlessly, needs a quota.
+- **Accomplishment art, not just hobby art.** A medal tier (Bronze→Platinum) and
+  a milestone ("Led my first trad climb") each want their own illustration, not
+  just a recolor — so the generator takes a *subject + tier/context*, and the
+  `BadgeDef` grows an optional `art` field alongside `tiers`.
+
+### Smallest honest first step
+A **style spike**: pick 2–3 candidate house styles, generate the same 5 hobby
+patches in each (Birding, Climbing, 3D Printing, Reading, Drinking), and look at
+them *as a sash together* — because consistency across patches, not any single
+image, is the thing to judge. No app wiring, no backend yet; just prove a style
+is good enough to build the pipeline around. Then wire the winning style through
+`registerInlineArt`/`registerArt` and persist to `HobbyDefinition.emblem`.

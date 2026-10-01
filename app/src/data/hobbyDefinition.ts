@@ -255,6 +255,11 @@ export function milestonesFromDefinition(
   )
 }
 
+/** The definition's authored missions (the per-rung "what do I do next" spine). */
+export function missionsFromDefinition(def: HobbyDefinition): MissionDef[] {
+  return def.missions
+}
+
 /** The definition's level ladder as plain names (drop-in for LEVELS). */
 export function levelNamesFromDefinition(def: HobbyDefinition): string[] {
   return def.levels.map((l) => l.name)

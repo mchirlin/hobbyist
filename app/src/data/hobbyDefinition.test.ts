@@ -6,6 +6,7 @@ import {
   normalizeLevels,
   medalsFromDefinition,
   milestonesFromDefinition,
+  missionsFromDefinition,
   levelNamesFromDefinition,
   xpThresholdsFromDefinition,
   type HobbyDefinition,
@@ -179,5 +180,19 @@ describe('accessors', () => {
     const ms = milestonesFromDefinition(def)
     expect(ms).toHaveLength(1)
     expect(ms[0].claim).toBe('self')
+  })
+
+  it('missionsFromDefinition returns the authored missions', () => {
+    const withMissions: HobbyDefinition = {
+      ...def,
+      missions: [
+        { text: 'First step.', level: 0 },
+        { text: 'Harder step.', level: 2 },
+      ],
+    }
+    const ms = missionsFromDefinition(withMissions)
+    expect(ms).toHaveLength(2)
+    expect(ms.map((m) => m.level)).toEqual([0, 2])
+    expect(missionsFromDefinition(def)).toEqual([])
   })
 })

@@ -933,3 +933,107 @@ footer code {
   font-size: 0.85rem;
   cursor: pointer;
 }
+
+/* ---- Mission authoring (per-rung next steps) ---- */
+.mission-toggle {
+  margin-top: 0;
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.mission-toggle:hover { border-color: var(--muted); color: var(--ink); }
+.mission-editor {
+  width: 100%;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.mission-editor-head {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 700;
+}
+.mission-editor-empty { margin: 0; color: var(--muted); font-size: 0.82rem; font-style: italic; }
+.mission-editor-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.mission-editor-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 8px;
+}
+.mission-editor-rung {
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: 72px;
+  text-align: center;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: var(--bg);
+  border-radius: 999px;
+  padding: 3px 6px;
+}
+.mission-editor-text { flex: 1; min-width: 0; font-size: 0.86rem; color: var(--ink); }
+.mission-editor-remove {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+}
+.mission-editor-add { display: flex; gap: 6px; }
+.mission-editor-level {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.84rem;
+}
+.mission-editor-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+}
+.mission-editor-actions { display: flex; gap: 8px; }
+.mission-editor-save {
+  background: var(--ink);
+  color: var(--card);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.mission-editor-save:disabled { opacity: 0.4; cursor: default; }
+.mission-editor-cancel {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
