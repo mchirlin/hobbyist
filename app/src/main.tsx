@@ -7,12 +7,12 @@ import { registerBadgeArt } from './components/badgeArt'
 
 registerBadgeArt()
 
-// v1 IS the badge — the single-hobby eBird life-list badge (the sharpest cut,
-// see ASSESSMENT.md) is the default, so a shared link is a clean URL. The full
-// multi-hobby prototype is parked at ?full while we validate whether the badge
-// spreads.
-const isFull = new URLSearchParams(window.location.search).has('full')
+// Home surface IS the collection case (declare-first, enrich-later — see
+// ASSESSMENT.md): the multi-hobby sash with instant "add a hobby" is the
+// product, because breadth is the whole thesis for the Renaissance-collector
+// market. The single-hobby eBird share badge is parked at ?badge.
+const isBadge = new URLSearchParams(window.location.search).has('badge')
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>{isFull ? <App /> : <BirdBadge />}</StrictMode>,
+  <StrictMode>{isBadge ? <BirdBadge /> : <App />}</StrictMode>,
 )

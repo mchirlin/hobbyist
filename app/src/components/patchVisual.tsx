@@ -7,6 +7,7 @@
 import type { ProfileHobby } from '../data/types'
 import { LEVELS } from '../data/types'
 import { CATEGORY_COLOR } from '../data/sampleProfile'
+import { isDeclared } from '../integrations/profileStore'
 import { resolveArt } from './art'
 
 /** Lighten (+) or darken (−) a hex color by a percentage. */
@@ -51,22 +52,35 @@ export function PatchBody({ hobby, r }: PatchBodyProps) {
   const emblemScale = (r * 1.15) / 100
   const showLabel = r > 30
   const level = hobby.level ?? 0
+  // Declared (no real data yet) = an "unearned" patch: faint, outlined, with a
+  // "connect to level up" cue. Enriched patches render at full saturation. This
+  // is the visible half of the declare-first/enrich-later loop — an empty slot
+  // that visibly WANTS to be filled.
+  const declared = isDeclared(hobby)
 
   return (
-    <>
+    <g opacity={declared ? 0.7 : 1}>
       {/* outer embroidered border (twill) */}
-      <path d={scallop(r, bumps)} fill={shade(color, -30)} pointerEvents="none" />
-      {/* stitched dashed ring */}
+      <path
+        d={scallop(r, bumps)}
+        fill={declared ? '#2a2f3a' : shade(color, -30)}
+        stroke={declared ? shade(color, 10) : 'none'}
+        strokeWidth={declared ? Math.max(1.5, r * 0.03) : 0}
+        strokeDasharray={declared ? `${r * 0.1} ${r * 0.07}` : undefined}
+        pointerEvents="none"
+      />
+      {/* stitched dashed ring (muted when declared) */}
       <circle
         r={r * 0.82}
-        fill={`url(#thread-${hobby.category})`}
+        fill={declared ? 'none' : `url(#thread-${hobby.category})`}
         stroke="#fff"
-        strokeOpacity="0.85"
+        strokeOpacity={declared ? 0.25 : 0.85}
         strokeWidth={Math.max(1.5, r * 0.03)}
         strokeDasharray={`${r * 0.16} ${r * 0.09}`}
         pointerEvents="none"
       />
       {/* emblem (illustration/image/emoji, centered, nudged up when labeled) */}
+      <g opacity={declared ? 0.5 : 1}>
       {emblem.kind === 'image' ? (
         <image
           href={emblem.href}
@@ -99,6 +113,7 @@ export function PatchBody({ hobby, r }: PatchBodyProps) {
           dangerouslySetInnerHTML={{ __html: emblem.svg }}
         />
       )}
+      </g>
       {/* hobby name */}
       {showLabel && (
         <text
@@ -135,7 +150,22 @@ export function PatchBody({ hobby, r }: PatchBodyProps) {
             />
           )
         })}
-    </>
+      {/* declared cue: a small "+" badge inviting a data connection */}
+      {declared && showLabel && (
+        <g transform={`translate(0,${r * 0.66})`} pointerEvents="none">
+          <text
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontSize={Math.max(7, r * 0.11)}
+            fill="#ffd43b"
+            fontWeight={700}
+            style={{ userSelect: 'none', letterSpacing: '0.04em' }}
+          >
+            + connect
+          </text>
+        </g>
+      )}
+    </g>
   )
 }
 

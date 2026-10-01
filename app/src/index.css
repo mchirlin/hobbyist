@@ -599,3 +599,126 @@ footer code {
   cursor: pointer;
 }
 .badge-primary:hover { background: #2b8a3e; }
+
+/* ---- Declare-first: add a hobby ---------------------------------------- */
+
+.add-hobby-wrap {
+  margin: 16px 0 4px;
+}
+
+.add-hobby-tile {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 16px;
+  border: 2px dashed var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.add-hobby-tile:hover {
+  border-color: #ffd43b;
+  background: #fffbea;
+}
+.add-hobby-plus { font-size: 1.8rem; line-height: 1; color: #e8590c; font-weight: 800; }
+.add-hobby-label { font-weight: 800; font-size: 1.05rem; }
+.add-hobby-hint { color: var(--muted); font-size: 0.82rem; }
+
+.add-hobby-form {
+  border: 2px solid #ffd43b;
+  border-radius: 14px;
+  background: var(--card);
+  padding: 14px;
+}
+.add-hobby-row { display: flex; gap: 8px; }
+.add-hobby-input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 1rem;
+  color: var(--ink);
+  background: var(--bg);
+}
+.add-hobby-emoji {
+  width: 56px;
+  text-align: center;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 1.1rem;
+  background: var(--bg);
+}
+.add-hobby-cats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0;
+}
+.add-hobby-cat {
+  padding: 5px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-hobby-cat.selected {
+  color: #fff;
+  border-color: transparent;
+}
+.add-hobby-cat.cat-Outdoors.selected { background: #2f9e44; }
+.add-hobby-cat.cat-Making.selected   { background: #e8590c; }
+.add-hobby-cat.cat-Music.selected     { background: #9c36b5; }
+.add-hobby-cat.cat-Games.selected     { background: #1971c2; }
+.add-hobby-cat.cat-Sport.selected     { background: #e03131; }
+.add-hobby-cat.cat-Craft.selected     { background: #d6336c; }
+.add-hobby-cat.cat-Mind.selected      { background: #0c8599; }
+
+.add-hobby-dup { margin: 2px 0 8px; color: #e03131; font-size: 0.85rem; }
+
+.add-hobby-actions { display: flex; gap: 8px; }
+.add-hobby-commit {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #e8590c;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.add-hobby-commit:disabled { background: var(--line); color: var(--muted); cursor: not-allowed; }
+.add-hobby-cancel {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+  font-weight: 700;
+  cursor: pointer;
+}
+.add-hobby-foot { margin: 8px 0 0; color: var(--muted); font-size: 0.8rem; text-align: center; }
+
+.declared-manage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.declared-remove {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.declared-remove:hover { border-color: #e03131; color: #e03131; }

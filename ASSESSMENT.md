@@ -1,123 +1,143 @@
-# The Hobbyist — Honest Assessment & v1 Plan
+# The Hobbyist — Product Thesis
 
-_Written 2026-09-30, after building the multi-hobby sash, the Plaid-like connect
-flow, live scrape connectors, and Pokémon-GO-style medals. This is the candid
-"step back" take, kept in the repo so the reasoning behind the v1 cut isn't lost._
+_Rewritten 2026-10-01 after the target market crystallized. The earlier version
+of this file pitched a single-hobby shareable birding badge; that was the wrong
+cut. This is the real product. The debugging/connector history is preserved at
+the bottom because the data-connection wall is still the central hard problem._
 
 ---
 
-## Is this a cool idea? Yes — with one hard caveat.
+## Who this is for
 
-The core idea is genuinely good: **your hobbies as a merit-badge sash, sized by
-how much they matter to you, that you can share.** It borrows the two instincts
-that make Strava and Pokémon GO sticky:
+**Generalists / Renaissance people — specifically the ADHD collector-learner.**
 
-- **Strava** turns effort into an identity you show off.
-- **Pokémon GO medals** make "a number you move" quietly addictive.
+Not the person who grinds one hobby to mastery. The person who:
 
-Both point at a space nobody serves well: the **generalist** — the person who's
-decent at six things and has no single place that says so. That's a real,
-unclaimed niche.
+- starts six things, goes deep on three, abandons two, and picks up a seventh
+  next month;
+- loves **collecting** and **learning new things** for their own sake;
+- has no single place that says "here is everything I'm into."
 
-## The hard caveat: the whole value is real + effortless data.
+This is a real, unclaimed niche. Every existing tracker serves the *specialist*
+(Strava for one sport, Goodreads for one medium). Nobody celebrates **breadth**.
 
-The magic is "it just knows." The moment a user has to type in a geocaching
-username, hand-enter Ultimate stats, or drop a CSV, it stops being a mirror of
-who they are and becomes a form to fill out.
+## The core insight: reward breadth and novelty, not depth and streaks
 
-And that wall is brutal. As of this prototype:
+Most gamified apps punish exactly the behavior this market exhibits. Duolingo
+shames you when a streak breaks. Fitness apps make you "fall behind." For an
+ADHD collector, that guilt loop is fatal — they bounce.
+
+**This product inverts it.** The win is "I started a 7th hobby this month," not
+"I kept a 500-day streak." Breadth is the achievement. Novelty is the reward.
+The dopamine lives in **filling a new empty slot**, not in the 500th rep of an
+old one. The product should always be dangling the next collectable thing.
+
+The mental model is a **collection display case** — a sash / medal case full of
+distinct patches. Your market are collectors; a collection shown at a glance,
+with visible variety and visible gaps-to-fill, *is* the product. (The earlier
+single-badge "performance stat" was the opposite of this. It was a receipt, not
+a trophy shelf — which is why it felt one-dimensional.)
+
+## The core loop: declare-first, enrich-later (works for BOTH)
+
+The key decision — and the thing that makes it work — is that a hobby lives in
+**two states**, and the transition between them is the loop:
+
+1. **Declare (instant, zero friction).** Tap "I'm into pottery now" → an **empty
+   patch** appears immediately. This is the collector dopamine hit and the ADHD
+   low-activation-energy path. The medal case shows the medal before you've
+   earned it — the empty slot is the invitation.
+2. **Enrich (optional, earned).** *Later*, connect real data (eBird CSV, a
+   profile, an API) → the patch **fills in and levels up** with honest,
+   earned depth. This is the reason to come back.
+
+Declare-first gives immediacy and breadth. Data-first gives honesty and depth.
+**The arrow between them is the magic**: tap to collect → optionally connect →
+watch it fill. Neither alone is the product; the loop is.
+
+### What this means for the data model (already mostly supported)
+
+`ProfileHobby` already carries `importance`, `level`, `missions`, and
+`metricCounts`. The two states map directly:
+
+- **Declared hobby** = a `ProfileHobby` with no `metricCounts` yet (empty patch,
+  level 0, "connect to level up" affordance).
+- **Enriched hobby** = `metricCounts` populated by a connector sync, driving
+  medal tiers and level.
+
+No schema rework needed — the states are a presence/absence of real data on an
+existing shape.
+
+## Why the connector wall still matters (more, not less)
+
+The data-connection problem is **more** central for this market, because an ADHD
+collector will not fill out six forms. Declare-first *buys time* against this
+wall (the hobby exists and feels good before any data), but "enrich" still has to
+be near-effortless or the second half of the loop never fires.
+
+Current honest state of connectors:
 
 | Connector | Real? | Reality |
 |---|---|---|
-| eBird — Download My Data (CSV) | ✅ **Fully real** | Parses your real export in-browser, zero auth. The one honest beachhead. |
+| eBird — Download My Data (CSV) | ✅ **Fully real** | Parses a real export in-browser, zero auth. The one honest beachhead. |
 | Ultimate — WFDF/USAU | ⚠️ Works server-side | Live fetch proven, but **browser CORS blocks it**; needs a proxy. |
-| Geocaching | ⚠️ Partial | Public profile fetches server-side; **find totals are auth-gated** (only souvenir count is public). |
+| Geocaching | ⚠️ Partial | Public profile fetches server-side; **find totals are auth-gated**. |
 | eBird — one-shot login | ⚠️ Half | Real no-store lifecycle, mock login in-browser. |
 | YouTube | ❌ Planned | Not built. |
 
-**One out of five is fully real.** Every hobby worth showing is behind a login,
-a scraper, or an API key. That's not a bug we haven't fixed — it's the *actual
-product*, and it's hard, unglamorous, per-source, and breaks when sites change.
+Declare-first means a hobby no longer *depends* on its connector to exist — which
+makes a partial/CORS-blocked connector a "level-up later" affordance instead of a
+dead end. That's a meaningful softening of the wall, not a solution to it.
 
-## A tension worth naming
+## What's built and reusable toward this
 
-A **shareable static artifact** (the sash) and a **fiddly self-improvement
-dashboard** (medals, quests, importance sliders, connect flows) are almost two
-different products:
+A well-tested prototype (**115 tests, clean build**, live at
+`https://mchirlin.github.io/hobbyist/`) that already contains most of the pieces
+this thesis needs — they were just cut down for the single-badge v1:
 
-- The **sash** is the thing someone screenshots and posts → it can spread.
-- The **medals/quests** are the thing that keeps *you* coming back → they don't
-  spread on their own.
+- **The multi-hobby physics sash** — the collection display case. This is the
+  product's center, not a v2 nice-to-have.
+- **The Plaid-like connect flow** (`connections.ts`, `ConnectDialog`,
+  `syncEngine`) — this is literally the "enrich" half of the loop.
+- **The medal system** (`quests/medals.ts`, Bronze→Platinum per metric) — the
+  collectable, multi-axis reward. A *case* of medals across axes is the
+  anti-one-dimensional answer.
+- **The eBird badge** — now reframed as *one tile* that can be enriched, not the
+  whole product.
 
-Both are good. A v1 that tries to nail both nails neither. **The
-sash-as-shareable-image is the wedge.**
+**The earlier assessment cut the wrong way.** It parked the sash, the connect
+flow, and the medals as "v2" to ship a testable single badge. But for *this*
+market, the sash-as-collection-case **is v1** — breadth is the whole point, and
+a single badge can't express breadth.
 
-## What it honestly is right now
+## v1 for the Renaissance-collector thesis
 
-A beautiful, well-tested prototype (**107 tests, clean build**) with **one real
-data source** and a lot of convincing scaffolding. That's exactly the right
-stage — but the distance from here to "cool thing people use" is almost entirely
-the **data-connection problem**, not more UI.
+> **"Collect everything you're into. Tap to add a hobby instantly; connect real
+> data to level it up."**
 
----
+1. **Declare:** a frictionless "add a hobby" that drops an empty patch into the
+   collection case immediately.
+2. **Collect/display:** the sash/medal-case as the home surface — breadth
+   visible at a glance, empty slots inviting the next one.
+3. **Enrich:** the existing connect flow turns a declared patch into an earned
+   one; medals/levels move as real data lands.
+4. **Share:** the full collection case is the artifact worth posting — "look at
+   everything I'm into," which is inherently multi-dimensional.
 
-## The sharpest-possible v1
+## The real question v1 answers
 
-> **"Paste your eBird CSV — get a shareable badge of your year in birding."**
-
-Not a sash of six hobbies. Not medals plural. Not connectors plural.
-**One hobby, one real data source, one image people want to post.**
-
-### Why this shape
-
-- **The sash needs ≥3 hobbies to look like anything** — which forces the
-  "fill out six forms" problem that kills cold users. A **single-hobby badge**
-  looks great with *one* connection.
-- **eBird CSV is the one honest connector** — real, in-browser, zero-auth,
-  live-tested. Birders are also a perfect early crowd: obsessive, list-driven,
-  love showing off a life list, already export CSVs.
-- **The shareable artifact is the growth engine**, not the dashboard. A birder
-  posts "my 2026 life list — 247 species 🦅" and every birder who sees it wants
-  theirs.
-
-### In scope for v1 (only this)
-
-1. **One landing action:** "Drop your eBird CSV." _(Already built and working.)_
-2. **One generated artifact:** a single beautiful badge/card — species count,
-   top birds, a tier (existing medal logic on one metric), the user's name.
-   Static, screenshottable, **downloadable as PNG**.
-3. **A share button + a "make your own" link back.** That's the loop.
-
-No login, no saved connections, no multi-hobby sash, no quests panel.
-
-### Cut from what's built (kept in the branch, not shipped)
-
-- **Multi-hobby physics sash** → v2. Best asset, but demands N connectors.
-- **Plaid connect flow / saved connections** → v2. Zero value with one
-  zero-auth source; it exists to manage many linked accounts we don't have yet.
-- **Geocaching / WFDF live fetch** → v2, gated behind a real CORS-proxy solution.
-- **Medals system** → collapse to **one tier badge** on the single card. The
-  framework stays; the UI shrinks.
-
-### The one honest risk of this cut
-
-It looks *smaller* than what exists — because it is. We've built a v2-shaped
-thing; v1 is a slice of it. That feels like going backwards. It isn't: the
-multi-hobby version **can't be tested with strangers until the connector problem
-is solved**; the single-hobby version can be tested next week.
-
-### The real question v1 answers
-
-Not "is it cool" (it is). It's: **does one birder, unprompted, post their badge —
-and does a second birder click "make mine"?** If yes, the connector grind is
-worth it. If no, no amount of connectors saves it. v1 answers that for the price
-of a weekend, not a quarter.
+Not "is it cool." It's: **does a collector-learner keep adding hobbies, and does
+connecting one real source feel good enough to pull them back?** Breadth +
+return — those are the two signals. If adding the 4th hobby and watching one fill
+in both feel rewarding, the connector grind is worth it.
 
 ---
 
-## Bottom line
+## Appendix: the data-connection history (why the wall is real)
 
-Cool idea, real niche, the fun parts are built and they *are* fun. Whether it's
-actually cool comes down to a problem we've cracked once out of five: **real,
-effortless data**. Ship the single-hobby eBird badge, see if it spreads, and let
-that decide whether the connector grind is worth it.
+The hard, unglamorous truth from building five connectors: **one of five is
+fully real** (eBird CSV). The rest hit browser CORS, auth-gated endpoints, or
+aren't built. Scraping public pages works server-side but is blocked in-browser
+and breaks when sites change. This is the actual product problem, and
+declare-first mitigates but does not eliminate it — "enrich" still needs to be
+near-effortless per source. See the connector table above for current state.

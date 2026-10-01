@@ -27,6 +27,13 @@ export interface HobbyActivity {
   lastActive?: string
   /** A few evidence items to show on the hobby / verify the signal. */
   evidence: ActivityEvidence[]
+  /**
+   * Medal-metric counts this signal produces, keyed like ProfileHobby.metricCounts
+   * (e.g. { 'ebird.species': 247 }). This is what the enrich step merges into a
+   * hobby so a DECLARED patch (no counts) flips to ENRICHED and its medal tiers
+   * move. Optional: a signal that drives only level/importance can omit it.
+   */
+  metricCounts?: Record<string, number>
 }
 
 /**

@@ -96,5 +96,7 @@ export function ebirdCsvToActivity(rows: EbirdCsvRow[]): HobbyActivity {
     level: levelFromThresholds(count, LIFE_LIST_LEVELS),
     lastActive,
     evidence,
+    // Feeds the Life List medal + flips the Birding patch declared → enriched.
+    metricCounts: { 'ebird.species': count },
   }
 }
