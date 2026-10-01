@@ -3,6 +3,7 @@ import {
   buildSeedDefinitions,
   slugify,
   defaultLevels,
+  normalizeLevels,
   medalsFromDefinition,
   milestonesFromDefinition,
   levelNamesFromDefinition,
@@ -28,6 +29,59 @@ describe('defaultLevels', () => {
     const levels = defaultLevels()
     expect(levels.map((l) => l.name)).toEqual([...LEVELS])
     expect(levels.map((l) => l.xpThreshold)).toEqual(LEVEL_XP_THRESHOLDS)
+  })
+})
+
+describe('normalizeLevels — the author-safety invariant', () => {
+  it('forces rung 0 to a 0-XP threshold', () => {
+    const out = normalizeLevels([
+      { name: 'Start', xpThreshold: 50 },
+      { name: 'Next', xpThreshold: 200 },
+    ])
+    expect(out[0].xpThreshold).toBe(0)
+    expect(out[0].name).toBe('Start')
+  })
+
+  it('nudges a non-ascending threshold to prior+1 so no rung is unreachable', () => {
+    const out = normalizeLevels([
+      { name: 'A', xpThreshold: 0 },
+      { name: 'B', xpThreshold: 100 },
+      { name: 'C', xpThreshold: 100 }, // equal — must become 101
+      { name: 'D', xpThreshold: 40 }, // lower — must become 102
+    ])
+    expect(out.map((l) => l.xpThreshold)).toEqual([0, 100, 101, 102])
+  })
+
+  it('falls back to a single Novice rung on an empty ladder', () => {
+    expect(normalizeLevels([])).toEqual([{ name: 'Novice', xpThreshold: 0 }])
+  })
+
+  it('fills a blank rung name with a positional default and trims names', () => {
+    const out = normalizeLevels([
+      { name: '  ', xpThreshold: 0 },
+      { name: '  Expert  ', xpThreshold: 500 },
+    ])
+    expect(out[0].name).toBe('Level 1')
+    expect(out[1].name).toBe('Expert')
+  })
+
+  it('floors negative/NaN thresholds and keeps integers', () => {
+    const out = normalizeLevels([
+      { name: 'A', xpThreshold: -5 },
+      { name: 'B', xpThreshold: Number.NaN },
+      { name: 'C', xpThreshold: 12.9 },
+    ])
+    expect(out.map((l) => l.xpThreshold)).toEqual([0, 1, 12])
+  })
+
+  it('supports a custom-length ladder (name your own rungs)', () => {
+    const out = normalizeLevels([
+      { name: 'Hatchling', xpThreshold: 0 },
+      { name: 'Fledgling', xpThreshold: 30 },
+      { name: 'Flyer', xpThreshold: 90 },
+    ])
+    expect(out).toHaveLength(3)
+    expect(out.map((l) => l.name)).toEqual(['Hatchling', 'Fledgling', 'Flyer'])
   })
 })
 

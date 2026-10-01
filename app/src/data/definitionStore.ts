@@ -16,7 +16,9 @@ import {
   type MissionDef,
   type BadgeDef,
   type MilestoneClaim,
+  type LevelDef,
   buildSeedDefinitions,
+  normalizeLevels,
   slugify,
 } from './hobbyDefinition'
 
@@ -124,6 +126,29 @@ export function removeMission(
 }
 
 /**
+ * Author a hobby's level ladder — rename rungs, retune XP thresholds, add or
+ * drop a rung. The ladder is run through `normalizeLevels` before it's stored,
+ * so what persists is always engine-safe (rung 0 @ 0 XP, strictly ascending),
+ * no matter what the editor UI hands in. Missions pinned above the new top rung
+ * are clamped down to the last rung so no mission dangles at a level that no
+ * longer exists.
+ */
+export function setLevels(
+  backend: StorageBackend,
+  slug: string,
+  levels: LevelDef[],
+): HobbyDefinition[] {
+  return editDefinition(backend, slug, (d) => {
+    const normalized = normalizeLevels(levels)
+    const topLevel = normalized.length - 1
+    const missions = d.missions.map((m) =>
+      m.level > topLevel ? { ...m, level: topLevel } : m,
+    )
+    return { ...d, levels: normalized, missions }
+  })
+}
+
+/**
  * Add a MILESTONE badge — the step-2 unlock, built now as the core authoring
  * primitive. A human-authored achievement with no connector; defaults to
  * `claim: 'self'` per the ADHD-market guardrail (friction kills this market —
@@ -214,6 +239,11 @@ export const definitionStore = (() => {
     },
     removeMission(slug: string, index: number) {
       const r = removeMission(backend, slug, index)
+      emit()
+      return r
+    },
+    setLevels(slug: string, levels: LevelDef[]) {
+      const r = setLevels(backend, slug, levels)
       emit()
       return r
     },

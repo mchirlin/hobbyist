@@ -129,6 +129,40 @@ export function defaultLevels(): LevelDef[] {
   }))
 }
 
+/**
+ * Normalize an author-edited level ladder into one the XP engine can consume.
+ *
+ * A hobby may name its own rungs, but `levelFromXp` / `xpToNextLevel` assume a
+ * well-formed ascending ladder, so authoring without a guard would let an admin
+ * create a non-monotonic or empty ladder that breaks progression for every
+ * member. This is the keystone invariant for level-ladder authoring:
+ *   • at least one rung (an empty ladder falls back to a single "Novice@0");
+ *   • rung 0's threshold is ALWAYS 0 (level 0 is reached at 0 XP);
+ *   • thresholds are STRICTLY ASCENDING — a rung whose threshold is ≤ the prior
+ *     rung's is nudged to prior+1 so no two rungs share an XP gate (which would
+ *     make a level unreachable / ambiguous);
+ *   • names are trimmed, and a blank name falls back to "Level N".
+ *
+ * Pure and deterministic — the editor calls it, the store persists its output,
+ * so what's stored is always engine-safe.
+ */
+export function normalizeLevels(input: LevelDef[]): LevelDef[] {
+  if (!input || input.length === 0) return [{ name: 'Novice', xpThreshold: 0 }]
+  const out: LevelDef[] = []
+  for (let i = 0; i < input.length; i++) {
+    const name = (input[i]?.name ?? '').trim() || `Level ${i + 1}`
+    let xpThreshold = Math.max(0, Math.floor(Number(input[i]?.xpThreshold) || 0))
+    if (i === 0) {
+      xpThreshold = 0
+    } else {
+      const prev = out[i - 1].xpThreshold
+      if (xpThreshold <= prev) xpThreshold = prev + 1
+    }
+    out.push({ name, xpThreshold })
+  }
+  return out
+}
+
 /** A metric BadgeDef built from an existing Medal (lossless). */
 function badgeFromMedal(m: Medal): BadgeDef {
   return {

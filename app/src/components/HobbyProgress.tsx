@@ -1,9 +1,17 @@
-import { useState } from 'react'
+import { useState, useSyncExternalStore } from 'react'
 import type { Profile } from '../data/types'
 import { LEVELS } from '../data/types'
 import { CATEGORY_COLOR } from '../data/sampleProfile'
+import {
+  definitionStore,
+} from '../data/definitionStore'
+import {
+  slugify,
+  levelNamesFromDefinition,
+} from '../data/hobbyDefinition'
 import { MedalCase } from './MedalCase'
 import { HobbyEditor } from './HobbyEditor'
+import { LevelLadderEditor } from './LevelLadderEditor'
 
 interface Props {
   profile: Profile
@@ -13,10 +21,20 @@ interface Props {
  * Shows the level-up ladder and the next suggested mission for each hobby.
  * A tangible take on the "level up + suggested missions" idea.
  *
+ * The ladder now renders from each hobby's OWN community-owned definition —
+ * author-named rungs (via LevelLadderEditor), not the hardcoded LEVELS — so an
+ * admin renaming "Novice → Master" to "Hatchling → Flyer" shows up live here.
+ *
  * Milestone claims are self-attested, held locally here (like quest
  * completions) — tapping a self-claim milestone in the MedalCase earns it.
  */
 export function HobbyProgress({ profile }: Props) {
+  // Subscribe to the definition store so authored ladders re-render immediately.
+  const definitions = useSyncExternalStore(
+    definitionStore.subscribe,
+    definitionStore.getSnapshot,
+  )
+
   // badgeId → claimed. Self-attested, cosmetic-only on your own patch
   // (COMMUNITY-MODEL §5.4), so local state is the right home in step 1.
   const [claimed, setClaimed] = useState<Record<string, boolean>>({})
@@ -27,7 +45,11 @@ export function HobbyProgress({ profile }: Props) {
     <div className="progress-list">
       {profile.hobbies.map((h) => {
         const color = CATEGORY_COLOR[h.category] ?? '#868e96'
-        const level = h.level ?? 0
+        const def = definitions.find((d) => d.slug === slugify(h.name))
+        // Author-named rungs when a definition exists; else the shared default.
+        const rungNames = def ? levelNamesFromDefinition(def) : [...LEVELS]
+        // Clamp the stored level into the (possibly re-authored) ladder range.
+        const level = Math.min(h.level ?? 0, rungNames.length - 1)
         const nextMission =
           h.missions?.find((m) => !m.done && m.level >= level) ??
           h.missions?.find((m) => !m.done)
@@ -37,15 +59,15 @@ export function HobbyProgress({ profile }: Props) {
               <span className="progress-icon">{h.icon}</span>
               <span className="progress-name">{h.name}</span>
               <span className="progress-level" style={{ color }}>
-                {LEVELS[level]}
+                {rungNames[level]}
               </span>
             </div>
 
-            {/* level ladder */}
-            <div className="ladder" role="img" aria-label={`Level ${LEVELS[level]}`}>
-              {LEVELS.map((lvl, i) => (
+            {/* level ladder — author-named rungs from the definition */}
+            <div className="ladder" role="img" aria-label={`Level ${rungNames[level]}`}>
+              {rungNames.map((lvl, i) => (
                 <span
-                  key={lvl}
+                  key={`${lvl}-${i}`}
                   className={'rung' + (i <= level ? ' filled' : '')}
                   style={i <= level ? { background: color } : undefined}
                   title={lvl}
@@ -72,8 +94,12 @@ export function HobbyProgress({ profile }: Props) {
               onClaimMilestone={toggleClaim}
             />
 
-            {/* author a new milestone badge (admin surface, local in step 1) */}
-            <HobbyEditor hobby={h.name} />
+            {/* authoring surfaces (admin, local in step 1):
+                name your own rungs + author a milestone badge */}
+            <div className="authoring-row">
+              <LevelLadderEditor hobby={h.name} />
+              <HobbyEditor hobby={h.name} />
+            </div>
           </div>
         )
       })}

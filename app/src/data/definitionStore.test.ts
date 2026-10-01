@@ -6,11 +6,17 @@ import {
   setDescription,
   addMission,
   removeMission,
+  setLevels,
   addMilestoneBadge,
   removeBadge,
   type StorageBackend,
 } from './definitionStore'
-import { buildSeedDefinitions, milestonesFromDefinition } from './hobbyDefinition'
+import {
+  buildSeedDefinitions,
+  milestonesFromDefinition,
+  levelNamesFromDefinition,
+  xpThresholdsFromDefinition,
+} from './hobbyDefinition'
 
 function memBackend(): StorageBackend {
   const m = new Map<string, string>()
@@ -77,6 +83,54 @@ describe('missions authoring', () => {
     removeMission(b, 'birding', birding.missions.length - 1)
     birding = findDefinition(readDefinitions(b), 'birding')!
     expect(birding.missions).toHaveLength(before)
+  })
+})
+
+describe('level-ladder authoring (name your own rungs)', () => {
+  it('renames rungs and persists a custom ladder', () => {
+    const b = memBackend()
+    setLevels(b, 'birding', [
+      { name: 'Hatchling', xpThreshold: 0 },
+      { name: 'Fledgling', xpThreshold: 30 },
+      { name: 'Flyer', xpThreshold: 90 },
+    ])
+    const def = findDefinition(readDefinitions(b), 'birding')!
+    expect(levelNamesFromDefinition(def)).toEqual(['Hatchling', 'Fledgling', 'Flyer'])
+    expect(xpThresholdsFromDefinition(def)).toEqual([0, 30, 90])
+    expect(def.version).toBe(2) // publish bump
+  })
+
+  it('normalizes an engine-unsafe ladder before storing (rung 0 → 0, ascending)', () => {
+    const b = memBackend()
+    setLevels(b, 'birding', [
+      { name: 'A', xpThreshold: 50 }, // rung 0 must become 0
+      { name: 'B', xpThreshold: 20 }, // > prior(0) → kept
+      { name: 'C', xpThreshold: 20 }, // equal to prior(20) → prior+1 = 21
+    ])
+    const def = findDefinition(readDefinitions(b), 'birding')!
+    expect(xpThresholdsFromDefinition(def)).toEqual([0, 20, 21])
+  })
+
+  it('clamps missions pinned above a now-shorter ladder down to the top rung', () => {
+    const b = memBackend()
+    // give birding a mission at level 3 first
+    addMission(b, 'birding', { text: 'High-level mission.', level: 3 })
+    // then shrink the ladder to 2 rungs (top level index = 1)
+    setLevels(b, 'birding', [
+      { name: 'Beginner', xpThreshold: 0 },
+      { name: 'Pro', xpThreshold: 100 },
+    ])
+    const def = findDefinition(readDefinitions(b), 'birding')!
+    const highMission = def.missions.find((m) => m.text === 'High-level mission.')!
+    expect(highMission.level).toBe(1) // clamped from 3 to top rung
+  })
+
+  it('leaves other definitions untouched', () => {
+    const b = memBackend()
+    setLevels(b, 'birding', [{ name: 'Solo', xpThreshold: 0 }])
+    const ultimate = findDefinition(readDefinitions(b), 'ultimate')!
+    expect(ultimate.version).toBe(1)
+    expect(levelNamesFromDefinition(ultimate)).toEqual(['Novice', 'Apprentice', 'Skilled', 'Expert', 'Master'])
   })
 })
 
