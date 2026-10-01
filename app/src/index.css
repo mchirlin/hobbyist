@@ -722,3 +722,85 @@ footer code {
   cursor: pointer;
 }
 .declared-remove:hover { border-color: #e03131; color: #e03131; }
+
+/* ---- Milestone badges (connector-less, human-claimed) ------------------- */
+.medal.milestone .milestone-disc {
+  border: 1.5px dashed var(--muted);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+.medal.milestone .milestone-disc:disabled { cursor: default; opacity: 0.7; }
+.medal.milestone.claimed .milestone-disc {
+  border-style: solid;
+  border-color: #e0aa1e;
+  background: #e0aa1e;
+  color: #fff;
+}
+.milestone-claim { color: var(--muted); font-size: 0.78rem; }
+.medal.milestone.claimed .milestone-claim { color: #b8860b; font-weight: 600; }
+.milestone-how { color: var(--muted); font-size: 0.8rem; margin-top: 2px; }
+
+/* ---- Hobby authoring (add a milestone badge) ---------------------------- */
+.author-toggle {
+  margin-top: 10px;
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.author-toggle:hover { border-color: var(--muted); color: var(--ink); }
+.author-form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+}
+.author-name, .author-how {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+.author-claim { display: flex; gap: 6px; }
+.claim-chip {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  text-transform: capitalize;
+}
+.claim-chip.active { border-color: #e0aa1e; color: var(--ink); background: #fff8e1; }
+.author-actions { display: flex; gap: 8px; }
+.author-add {
+  background: var(--ink);
+  color: var(--card);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.author-add:disabled { opacity: 0.4; cursor: default; }
+.author-cancel {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
