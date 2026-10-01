@@ -3,3 +3,4 @@ dist
 *.local
 .DS_Store
 scripts/ephemeral-sync/.adapter.*.mjs
+src/badges/generated/
