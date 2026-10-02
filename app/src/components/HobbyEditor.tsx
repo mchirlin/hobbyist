@@ -4,6 +4,8 @@ import { slugify, type MilestoneClaim } from '../data/hobbyDefinition'
 
 interface Props {
   hobby: string
+  /** When true, render the form directly (no toggle button) — for the edit panel. */
+  embedded?: boolean
 }
 
 const CLAIM_LABEL: Record<MilestoneClaim, string> = {
@@ -19,9 +21,9 @@ const CLAIM_LABEL: Record<MilestoneClaim, string> = {
  * to self-claim per the ADHD-market guardrail (COMMUNITY-MODEL §3/§4). The edit
  * persists to definitionStore and the MedalCase re-renders with the new badge.
  */
-export function HobbyEditor({ hobby }: Props) {
+export function HobbyEditor({ hobby, embedded = false }: Props) {
   const slug = slugify(hobby)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(embedded)
   const [name, setName] = useState('')
   const [how, setHow] = useState('')
   const [claim, setClaim] = useState<MilestoneClaim>('self')
@@ -33,10 +35,10 @@ export function HobbyEditor({ hobby }: Props) {
     setName('')
     setHow('')
     setClaim('self')
-    setOpen(false)
+    if (!embedded) setOpen(false)
   }
 
-  if (!open) {
+  if (!open && !embedded) {
     return (
       <button className="author-toggle" onClick={() => setOpen(true)}>
         + Author a milestone badge
@@ -82,9 +84,11 @@ export function HobbyEditor({ hobby }: Props) {
         <button className="author-add" onClick={add} disabled={!name.trim()}>
           Add badge
         </button>
-        <button className="author-cancel" onClick={() => setOpen(false)}>
-          Cancel
-        </button>
+        {!embedded && (
+          <button className="author-cancel" onClick={() => setOpen(false)}>
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   )

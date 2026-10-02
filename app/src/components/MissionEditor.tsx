@@ -8,6 +8,8 @@ import {
 
 interface Props {
   hobby: string
+  /** When true, render the form directly (no toggle button) — for the edit panel. */
+  embedded?: boolean
 }
 
 /**
@@ -18,13 +20,13 @@ interface Props {
  * and rungs stay in sync. Edits commit through definitionStore.addMission /
  * removeMission and surface live as the card's "🎯 Next mission".
  */
-export function MissionEditor({ hobby }: Props) {
+export function MissionEditor({ hobby, embedded = false }: Props) {
   const slug = slugify(hobby)
   const def = definitionStore.find(slug)
   const rungNames = def ? levelNamesFromDefinition(def) : ['Novice']
   const missions = def ? missionsFromDefinition(def) : []
 
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(embedded)
   const [text, setText] = useState('')
   const [level, setLevel] = useState(0)
 
@@ -36,7 +38,7 @@ export function MissionEditor({ hobby }: Props) {
     setLevel(0)
   }
 
-  if (!open) {
+  if (!open && !embedded) {
     return (
       <button className="mission-toggle" onClick={() => setOpen(true)}>
         🎯 Author missions
@@ -103,9 +105,11 @@ export function MissionEditor({ hobby }: Props) {
         <button className="mission-editor-save" onClick={add} disabled={!text.trim()} type="button">
           Add mission
         </button>
-        <button className="mission-editor-cancel" onClick={() => setOpen(false)} type="button">
-          Done
-        </button>
+        {!embedded && (
+          <button className="mission-editor-cancel" onClick={() => setOpen(false)} type="button">
+            Done
+          </button>
+        )}
       </div>
     </div>
   )

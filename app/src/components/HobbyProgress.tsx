@@ -10,10 +10,9 @@ import {
   levelNamesFromDefinition,
   missionsFromDefinition,
 } from '../data/hobbyDefinition'
+import { missionProgressStore, isMissionDone } from '../data/missionProgress'
 import { MedalCase } from './MedalCase'
-import { HobbyEditor } from './HobbyEditor'
-import { LevelLadderEditor } from './LevelLadderEditor'
-import { MissionEditor } from './MissionEditor'
+import { HobbyEditPanel } from './HobbyEditPanel'
 
 interface Props {
   profile: Profile
@@ -37,6 +36,14 @@ export function HobbyProgress({ profile }: Props) {
     definitionStore.getSnapshot,
   )
 
+  // Subscribe to persisted mission done-state so checking a mission off
+  // re-renders here and survives reload (user progress, not definition data).
+  const missionDone = useSyncExternalStore(
+    missionProgressStore.subscribe,
+    missionProgressStore.getSnapshot,
+    missionProgressStore.getSnapshot,
+  )
+
   // badgeId → claimed. Self-attested, cosmetic-only on your own patch
   // (COMMUNITY-MODEL §5.4), so local state is the right home in step 1.
   const [claimed, setClaimed] = useState<Record<string, boolean>>({})
@@ -48,12 +55,15 @@ export function HobbyProgress({ profile }: Props) {
       {profile.hobbies.map((h) => {
         const color = CATEGORY_COLOR[h.category] ?? '#868e96'
         const def = definitions.find((d) => d.slug === slugify(h.name))
+        const slug = slugify(h.name)
         // Author-named rungs when a definition exists; else the shared default.
         const rungNames = def ? levelNamesFromDefinition(def) : [...LEVELS]
         // Clamp the stored level into the (possibly re-authored) ladder range.
         const level = Math.min(h.level ?? 0, rungNames.length - 1)
         // Prefer the definition's AUTHORED missions (admin-editable); fall back
-        // to the profile seed. Done-state lives on the profile, so match by text.
+        // to the profile seed. Done-state is now USER progress: the persisted
+        // missionProgress store is authoritative; the profile seed's `done`
+        // flag is a one-time fallback for missions the user hasn't toggled yet.
         const doneTexts = new Set(
           (h.missions ?? []).filter((m) => m.done).map((m) => m.text),
         )
@@ -61,11 +71,15 @@ export function HobbyProgress({ profile }: Props) {
         const missionPool = (authored.length > 0 ? authored : h.missions ?? []).map((m) => ({
           text: m.text,
           level: m.level,
-          done: 'done' in m ? Boolean(m.done) : doneTexts.has(m.text),
+          done:
+            isMissionDone(missionDone, slug, m.text) ||
+            ('done' in m ? Boolean(m.done) : doneTexts.has(m.text)),
         }))
-        const nextMission =
-          missionPool.find((m) => !m.done && m.level >= level) ??
-          missionPool.find((m) => !m.done)
+        // Show the missions relevant NOW — those at or above the current rung —
+        // each a self-attested checkbox. Completed ones stay visible (struck
+        // through) so the sense of progress accumulates.
+        const relevantMissions = missionPool.filter((m) => m.level >= level)
+        const shownMissions = relevantMissions.length > 0 ? relevantMissions : missionPool
         return (
           <div className="progress-card" key={h.name}>
             <div className="progress-head">
@@ -88,13 +102,38 @@ export function HobbyProgress({ profile }: Props) {
               ))}
             </div>
 
-            {/* next mission */}
-            {nextMission && (
-              <div className="mission">
+            {/* missions for the current rung — each a self-attested checkbox.
+                Checking one marks it done (persisted) and advances what's next. */}
+            {shownMissions.length > 0 && (
+              <div className="missions" aria-label={`Missions for ${h.name}`}>
                 <span className="mission-flag" style={{ color }}>
-                  🎯 Next mission
+                  🎯 Missions
                 </span>
-                <span className="mission-text">{nextMission.text}</span>
+                <ul className="mission-check-list">
+                  {shownMissions.map((m, i) => (
+                    <li
+                      className={'mission-check-item' + (m.done ? ' done' : '')}
+                      key={`${m.text}-${i}`}
+                    >
+                      <label className="mission-check">
+                        <input
+                          type="checkbox"
+                          checked={m.done}
+                          onChange={() => missionProgressStore.toggle(slug, m.text)}
+                          aria-label={`Complete mission: ${m.text}`}
+                        />
+                        <span
+                          className="mission-box"
+                          aria-hidden
+                          style={{ borderColor: color }}
+                        >
+                          {m.done ? '✓' : ''}
+                        </span>
+                      </label>
+                      <span className="mission-check-text">{m.text}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
@@ -107,12 +146,10 @@ export function HobbyProgress({ profile }: Props) {
               onClaimMilestone={toggleClaim}
             />
 
-            {/* authoring surfaces (admin, local in step 1):
-                name your own rungs + author missions + author a milestone badge */}
+            {/* authoring (admin, local in step 1): one Edit entry opens a
+                tabbed panel — Levels · Missions · Badges · About. */}
             <div className="authoring-row">
-              <LevelLadderEditor hobby={h.name} />
-              <MissionEditor hobby={h.name} />
-              <HobbyEditor hobby={h.name} />
+              <HobbyEditPanel hobby={h.name} />
             </div>
           </div>
         )

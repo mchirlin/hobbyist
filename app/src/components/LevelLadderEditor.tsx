@@ -4,6 +4,8 @@ import { slugify, normalizeLevels, type LevelDef } from '../data/hobbyDefinition
 
 interface Props {
   hobby: string
+  /** When true, render the form directly (no toggle button) — for the edit panel. */
+  embedded?: boolean
 }
 
 /**
@@ -17,9 +19,9 @@ interface Props {
  * will be stored, so an author sees a non-ascending threshold corrected before
  * they commit. Rung 0's threshold is fixed at 0 and shown read-only.
  */
-export function LevelLadderEditor({ hobby }: Props) {
+export function LevelLadderEditor({ hobby, embedded = false }: Props) {
   const slug = slugify(hobby)
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(embedded)
   const current = definitionStore.find(slug)?.levels ?? []
   const [draft, setDraft] = useState<LevelDef[]>(current)
 
@@ -49,10 +51,10 @@ export function LevelLadderEditor({ hobby }: Props) {
   }
   function save() {
     definitionStore.setLevels(slug, draft)
-    setOpen(false)
+    if (!embedded) setOpen(false)
   }
 
-  if (!open) {
+  if (!open && !embedded) {
     return (
       <button className="ladder-toggle" onClick={openEditor}>
         🪜 Name your own rungs
@@ -114,9 +116,11 @@ export function LevelLadderEditor({ hobby }: Props) {
         <button className="ladder-save" onClick={save} type="button">
           Save ladder
         </button>
-        <button className="ladder-cancel" onClick={() => setOpen(false)} type="button">
-          Cancel
-        </button>
+        {!embedded && (
+          <button className="ladder-cancel" onClick={() => setOpen(false)} type="button">
+            Cancel
+          </button>
+        )}
       </div>
     </div>
   )
