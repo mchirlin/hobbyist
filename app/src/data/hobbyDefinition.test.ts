@@ -7,6 +7,7 @@ import {
   medalsFromDefinition,
   milestonesFromDefinition,
   missionsFromDefinition,
+  questsFromDefinition,
   levelNamesFromDefinition,
   xpThresholdsFromDefinition,
   type HobbyDefinition,
@@ -14,7 +15,7 @@ import {
 import { MEDALS_BY_HOBBY } from '../quests/medals'
 import { sampleQuests } from '../quests/sampleQuests'
 import { LEVELS } from './types'
-import { LEVEL_XP_THRESHOLDS } from '../quests/quests'
+import { LEVEL_XP_THRESHOLDS, CADENCE_XP, onceXp } from '../quests/quests'
 import { sampleProfile } from './sampleProfile'
 
 describe('slugify', () => {
@@ -108,17 +109,22 @@ describe('buildSeedDefinitions — the lift is lossless', () => {
     }
   })
 
-  it('reproduces each hobby\'s quests from sampleQuests', () => {
+  it('reproduces each hobby\'s recurring quests from sampleQuests', () => {
     const birding = bySlug.get('birding')!
     const birdingQuests = sampleQuests.filter((q) => q.hobby === 'Birding')
-    expect(birding.quests.map((q) => q.id)).toEqual(birdingQuests.map((q) => q.id))
-    expect(birding.quests.map((q) => q.text)).toEqual(birdingQuests.map((q) => q.text))
+    const recurring = birding.quests.filter((q) => q.cadence !== 'once')
+    expect(recurring.map((q) => q.id)).toEqual(birdingQuests.map((q) => q.id))
+    expect(recurring.map((q) => q.text)).toEqual(birdingQuests.map((q) => q.text))
   })
 
-  it('reproduces each hobby\'s missions from the seed profile', () => {
+  it('folds each hobby\'s seed missions into one-time (level-tagged) quests', () => {
     for (const h of sampleProfile.hobbies) {
       const def = bySlug.get(slugify(h.name))!
-      expect(def.missions).toEqual(
+      // Missions are unified into quests now — the field itself is empty…
+      expect(def.missions).toEqual([])
+      // …and every seed mission appears as a `once` quest at its level.
+      const once = def.quests.filter((q) => q.cadence === 'once')
+      expect(once.map((q) => ({ text: q.text, level: q.level }))).toEqual(
         (h.missions ?? []).map((m) => ({ text: m.text, level: m.level })),
       )
     }
@@ -182,17 +188,63 @@ describe('accessors', () => {
     expect(ms[0].claim).toBe('self')
   })
 
-  it('missionsFromDefinition returns the authored missions', () => {
-    const withMissions: HobbyDefinition = {
+  it('missionsFromDefinition derives one-time quests (and folds legacy missions)', () => {
+    // From once-quests on the modern shape:
+    const withOnce: HobbyDefinition = {
       ...def,
-      missions: [
-        { text: 'First step.', level: 0 },
-        { text: 'Harder step.', level: 2 },
+      quests: [
+        { id: 'q-once-0', cadence: 'once', text: 'First step.', level: 0 },
+        { id: 'q-once-2', cadence: 'once', text: 'Harder step.', level: 2 },
+        { id: 'q-daily', cadence: 'daily', text: 'A recurring one.' },
       ],
     }
-    const ms = missionsFromDefinition(withMissions)
+    const ms = missionsFromDefinition(withOnce)
     expect(ms).toHaveLength(2)
     expect(ms.map((m) => m.level)).toEqual([0, 2])
+
+    // Legacy `missions` are folded in too (back-compat with old stored data):
+    const legacy: HobbyDefinition = {
+      ...def,
+      missions: [{ text: 'Old mission.', level: 1 }],
+    }
+    expect(missionsFromDefinition(legacy)).toEqual([{ text: 'Old mission.', level: 1 }])
+
     expect(missionsFromDefinition(def)).toEqual([])
+  })
+
+  it('questsFromDefinition materializes XP: recurring via CADENCE_XP, once via onceXp', () => {
+    const d: HobbyDefinition = {
+      ...def,
+      quests: [
+        { id: 'q-d', cadence: 'daily', text: 'daily' },
+        { id: 'q-w', cadence: 'weekly', text: 'weekly' },
+        { id: 'q-o0', cadence: 'once', text: 'step 0', level: 0 },
+        { id: 'q-o3', cadence: 'once', text: 'step 3', level: 3 },
+      ],
+    }
+    const quests = questsFromDefinition(d)
+    const byId = new Map(quests.map((q) => [q.id, q]))
+    expect(byId.get('q-d')!.xp).toBe(CADENCE_XP.daily)
+    expect(byId.get('q-w')!.xp).toBe(CADENCE_XP.weekly)
+    expect(byId.get('q-o0')!.xp).toBe(onceXp(0)) // 30
+    expect(byId.get('q-o3')!.xp).toBe(onceXp(3)) // 120
+    // Every materialized quest carries the hobby name.
+    expect(quests.every((q) => q.hobby === d.name)).toBe(true)
+  })
+
+  it('questsFromDefinition folds legacy missions into once-quests without duplicating', () => {
+    const d: HobbyDefinition = {
+      ...def,
+      quests: [{ id: 'q-o0', cadence: 'once', text: 'already a quest', level: 0 }],
+      missions: [
+        { text: 'already a quest', level: 0 }, // dup by text — must NOT double
+        { text: 'legacy only', level: 1 },
+      ],
+    }
+    const quests = questsFromDefinition(d)
+    expect(quests.filter((q) => q.text === 'already a quest')).toHaveLength(1)
+    const legacy = quests.find((q) => q.text === 'legacy only')!
+    expect(legacy.cadence).toBe('once')
+    expect(legacy.xp).toBe(onceXp(1))
   })
 })

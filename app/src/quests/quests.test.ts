@@ -5,6 +5,7 @@ import {
   xpToNextLevel,
   isCompleted,
   CADENCE_XP,
+  onceXp,
   type Quest,
   type QuestCompletions,
 } from './quests'
@@ -13,8 +14,25 @@ const quests: Quest[] = [
   { id: 'b-d', hobby: 'Birding', cadence: 'daily', text: 'x', xp: CADENCE_XP.daily },
   { id: 'b-w', hobby: 'Birding', cadence: 'weekly', text: 'x', xp: CADENCE_XP.weekly },
   { id: 'b-m', hobby: 'Birding', cadence: 'monthly', text: 'x', xp: CADENCE_XP.monthly },
+  { id: 'b-o', hobby: 'Birding', cadence: 'once', text: 'x', level: 2, xp: onceXp(2) },
   { id: 'u-d', hobby: 'Ultimate', cadence: 'daily', text: 'x', xp: CADENCE_XP.daily },
 ]
+
+describe('onceXp — one-time quests scale with level', () => {
+  it('awards 30 + 30·level, so climbing the ladder is worth more', () => {
+    expect(onceXp(0)).toBe(30)
+    expect(onceXp(1)).toBe(60)
+    expect(onceXp(4)).toBe(150)
+    // Sits between a daily (10) and a monthly (120) at the low rungs.
+    expect(onceXp(0)).toBeGreaterThan(CADENCE_XP.daily)
+    expect(onceXp(2)).toBeLessThanOrEqual(CADENCE_XP.monthly)
+  })
+
+  it('floors junk input to level 0', () => {
+    expect(onceXp(-5)).toBe(30)
+    expect(onceXp(Number.NaN)).toBe(30)
+  })
+})
 
 describe('hobbyXp', () => {
   it('sums only completed quests for the given hobby', () => {

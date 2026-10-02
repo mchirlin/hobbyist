@@ -18,13 +18,16 @@ interface Props {
   onToggle: (questId: string) => void
 }
 
-const CADENCE_ORDER: QuestCadence[] = ['daily', 'weekly', 'monthly']
-const CADENCE_LABEL: Record<QuestCadence, string> = {
+/** The recurring cadences shown on the Quest board (one-time lives per-hobby). */
+type RecurringCadence = Exclude<QuestCadence, 'once'>
+
+const CADENCE_ORDER: RecurringCadence[] = ['daily', 'weekly', 'monthly']
+const CADENCE_LABEL: Record<RecurringCadence, string> = {
   daily: 'Daily',
   weekly: 'Weekly',
   monthly: 'Monthly',
 }
-const CADENCE_BLURB: Record<QuestCadence, string> = {
+const CADENCE_BLURB: Record<RecurringCadence, string> = {
   daily: 'Small wins — build a streak.',
   weekly: 'Meaningful progress.',
   monthly: 'Milestones & seasonal patches.',
@@ -33,7 +36,8 @@ const CADENCE_BLURB: Record<QuestCadence, string> = {
 /**
  * The Quest board — the active engine. Self-attested daily/weekly/monthly
  * challenges; completing them earns XP that levels up the matching hobby on
- * the sash. No connectors required.
+ * the sash. No connectors required. One-time "steps" (the old missions) are
+ * excluded here — they live per-hobby in the drill-down, surfaced by level.
  */
 export function QuestBoard({ profile, quests, completions, onToggle }: Props) {
   const catOf = useMemo(() => {
@@ -42,10 +46,16 @@ export function QuestBoard({ profile, quests, completions, onToggle }: Props) {
     return m
   }, [profile])
 
+  // Recurring challenges only; one-time steps are a per-hobby concern.
+  const recurring = useMemo(
+    () => quests.filter((q) => q.cadence !== 'once'),
+    [quests],
+  )
+
   return (
     <div className="quest-board">
       {CADENCE_ORDER.map((cadence) => {
-        const group = quests.filter((q) => q.cadence === cadence)
+        const group = recurring.filter((q) => q.cadence === cadence)
         if (group.length === 0) return null
         return (
           <div className="quest-group" key={cadence}>

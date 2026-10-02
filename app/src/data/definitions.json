@@ -29,16 +29,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Print a multi-part model with moving joints.",
-          "level": 2
-        },
-        {
-          "text": "Design your own part in CAD and print it.",
-          "level": 3
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "print-d1",
@@ -54,6 +45,18 @@
           "id": "print-m1",
           "cadence": "monthly",
           "text": "Design your own part in CAD and print it."
+        },
+        {
+          "id": "3d-printing-once-2-0",
+          "cadence": "once",
+          "text": "Print a multi-part model with moving joints.",
+          "level": 2
+        },
+        {
+          "id": "3d-printing-once-3-1",
+          "cadence": "once",
+          "text": "Design your own part in CAD and print it.",
+          "level": 3
         }
       ],
       "badges": [
@@ -117,16 +120,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Solder a kit without a cold joint.",
-          "level": 1
-        },
-        {
-          "text": "Build a circuit from a schematic you read yourself.",
-          "level": 2
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "elec-d1",
@@ -142,6 +136,18 @@
           "id": "elec-m1",
           "cadence": "monthly",
           "text": "Build a project from a schematic you read yourself."
+        },
+        {
+          "id": "electronics-once-1-0",
+          "cadence": "once",
+          "text": "Solder a kit without a cold joint.",
+          "level": 1
+        },
+        {
+          "id": "electronics-once-2-1",
+          "cadence": "once",
+          "text": "Build a circuit from a schematic you read yourself.",
+          "level": 2
         }
       ],
       "badges": [
@@ -205,16 +211,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Throw a backhand and forehand 40+ yards accurately.",
-          "level": 3
-        },
-        {
-          "text": "Captain a team through a tournament.",
-          "level": 4
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "ultimate-d1",
@@ -230,6 +227,18 @@
           "id": "ultimate-m1",
           "cadence": "monthly",
           "text": "Attend a tournament or league night."
+        },
+        {
+          "id": "ultimate-once-3-0",
+          "cadence": "once",
+          "text": "Throw a backhand and forehand 40+ yards accurately.",
+          "level": 3
+        },
+        {
+          "id": "ultimate-once-4-1",
+          "cadence": "once",
+          "text": "Captain a team through a tournament.",
+          "level": 4
         }
       ],
       "badges": [
@@ -319,16 +328,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Play a clean C–F–G change 10 times in a row.",
-          "level": 1
-        },
-        {
-          "text": "Play a full song start to finish.",
-          "level": 2
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "uke-d1",
@@ -339,6 +339,18 @@
           "id": "uke-w1",
           "cadence": "weekly",
           "text": "Learn one new song section."
+        },
+        {
+          "id": "ukulele-once-1-0",
+          "cadence": "once",
+          "text": "Play a clean C–F–G change 10 times in a row.",
+          "level": 1
+        },
+        {
+          "id": "ukulele-once-2-1",
+          "cadence": "once",
+          "text": "Play a full song start to finish.",
+          "level": 2
         }
       ],
       "badges": [
@@ -402,16 +414,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Find your first 5 caches.",
-          "level": 1
-        },
-        {
-          "text": "Hide and publish a cache of your own.",
-          "level": 2
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "geo-d1",
@@ -427,6 +430,18 @@
           "id": "geo-m1",
           "cadence": "monthly",
           "text": "Hide and publish a cache of your own."
+        },
+        {
+          "id": "geocaching-once-1-0",
+          "cadence": "once",
+          "text": "Find your first 5 caches.",
+          "level": 1
+        },
+        {
+          "id": "geocaching-once-2-1",
+          "cadence": "once",
+          "text": "Hide and publish a cache of your own.",
+          "level": 2
         }
       ],
       "badges": [
@@ -516,16 +531,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Log 10 different species on eBird.",
-          "level": 0
-        },
-        {
-          "text": "Identify 5 birds by call alone.",
-          "level": 1
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "birding-d1",
@@ -546,6 +552,18 @@
           "id": "birding-m1",
           "cadence": "monthly",
           "text": "Visit a new hotspot and log 10+ species."
+        },
+        {
+          "id": "birding-once-0-0",
+          "cadence": "once",
+          "text": "Log 10 different species on eBird.",
+          "level": 0
+        },
+        {
+          "id": "birding-once-1-1",
+          "cadence": "once",
+          "text": "Identify 5 birds by call alone.",
+          "level": 1
         }
       ],
       "badges": [
@@ -609,12 +627,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Lay out and order your first custom PCB.",
-          "level": 1
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "pcb-d1",
@@ -630,6 +643,12 @@
           "id": "pcb-m1",
           "cadence": "monthly",
           "text": "Order a custom PCB and assemble it."
+        },
+        {
+          "id": "pcb-once-1-0",
+          "cadence": "once",
+          "text": "Lay out and order your first custom PCB.",
+          "level": 1
         }
       ],
       "badges": [
@@ -693,12 +712,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Cut a 60-second edit with a hook in the first 3s.",
-          "level": 1
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "video-d1",
@@ -714,6 +728,12 @@
           "id": "video-m1",
           "cadence": "monthly",
           "text": "Publish a finished video."
+        },
+        {
+          "id": "video-making-once-1-0",
+          "cadence": "once",
+          "text": "Cut a 60-second edit with a hook in the first 3s.",
+          "level": 1
         }
       ],
       "badges": [
@@ -777,12 +797,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Tell a 5-minute story at an open mic.",
-          "level": 1
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "story-d1",
@@ -798,6 +813,12 @@
           "id": "story-m1",
           "cadence": "monthly",
           "text": "Tell a story at an open mic."
+        },
+        {
+          "id": "storytelling-once-1-0",
+          "cadence": "once",
+          "text": "Tell a 5-minute story at an open mic.",
+          "level": 1
         }
       ],
       "badges": [
@@ -861,12 +882,7 @@
           "xpThreshold": 1000
         }
       ],
-      "missions": [
-        {
-          "text": "Knit a scarf in garter stitch.",
-          "level": 0
-        }
-      ],
+      "missions": [],
       "quests": [
         {
           "id": "knit-d1",
@@ -877,6 +893,12 @@
           "id": "knit-w1",
           "cadence": "weekly",
           "text": "Finish a small project (coaster, swatch)."
+        },
+        {
+          "id": "knitting-once-0-0",
+          "cadence": "once",
+          "text": "Knit a scarf in garter stitch.",
+          "level": 0
         }
       ],
       "badges": [

@@ -8,11 +8,10 @@ import { AddHobbyButton } from './components/AddHobbyButton'
 import { CreateHobbyWizard } from './components/CreateHobbyWizard'
 import { QuestBoard } from './components/QuestBoard'
 import { ImportanceEditor } from './components/ImportanceEditor'
-import { sampleQuests } from './quests/sampleQuests'
-import { hobbyXp, levelFromXp, type QuestCompletions } from './quests/quests'
+import { hobbyXp, levelFromXp, type Quest, type QuestCompletions } from './quests/quests'
 import { profileStore, isDeclared } from './integrations/profileStore'
-import { missionProgressStore } from './data/missionProgress'
 import { definitionStore } from './data/definitionStore'
+import { questsFromDefinition } from './data/hobbyDefinition'
 import { CATEGORY_ARCHETYPE } from './data/sampleProfile'
 import type { Profile } from './data/types'
 import type { HobbyActivity } from './integrations/activity'
@@ -33,7 +32,20 @@ export default function App() {
     profileStore.getSnapshot,
     profileStore.getSnapshot,
   )
+  // Hobby definitions (universal catalog + local edits) — the source of every
+  // quest (recurring + one-time). Subscribing keeps the pool live on edits.
+  const definitions = useSyncExternalStore(
+    definitionStore.subscribe,
+    definitionStore.getSnapshot,
+  )
   const [completions, setCompletions] = useState<QuestCompletions>({})
+
+  // The ONE quest pool: every definition's quests materialized (recurring +
+  // one-time "steps", each with XP). Missions and quests are now one thing.
+  const quests = useMemo<Quest[]>(
+    () => definitions.flatMap((d) => questsFromDefinition(d)),
+    [definitions],
+  )
 
   // App-shell navigation, modeled on Pokémon GO / Facebook: a persistent
   // bottom tab bar is the primary nav, each tab is a focused screen, and a
@@ -49,13 +61,13 @@ export default function App() {
     return {
       ...baseProfile,
       hobbies: baseProfile.hobbies.map((h) => {
-        const xp = hobbyXp(sampleQuests, completions, h.name)
+        const xp = hobbyXp(quests, completions, h.name)
         if (xp === 0) return h
         const questLevel = levelFromXp(xp)
         return { ...h, level: Math.max(h.level ?? 0, questLevel) }
       }),
     }
-  }, [baseProfile, completions])
+  }, [baseProfile, quests, completions])
 
   const declaredCount = baseProfile.hobbies.filter(isDeclared).length
   const enrichedCount = baseProfile.hobbies.length - declaredCount
@@ -85,19 +97,19 @@ export default function App() {
   }
 
   // Wipe all earned progress but KEEP every hobby (and its definition). Resets
-  // the three progress layers: synced levels/metrics (profileStore), mission
-  // done-flags (missionProgressStore), and quest completions (local state).
+  // the two progress layers: synced levels/metrics (profileStore) and quest
+  // completions (local state — now covers the old missions too, since missions
+  // are unified into quests).
   function resetProgress() {
     if (
       typeof window !== 'undefined' &&
       !window.confirm(
-        'Clear all progress from every hobby? Your hobbies stay — only levels, medals, missions, and quest completions are reset.',
+        'Clear all progress from every hobby? Your hobbies stay — only levels, medals, and quest completions are reset.',
       )
     ) {
       return
     }
     profileStore.clearProgress()
-    missionProgressStore.reset()
     setCompletions({})
   }
 
@@ -116,7 +128,7 @@ export default function App() {
         <HobbyDetail
           hobby={activeHobby}
           profile={profile}
-          quests={sampleQuests}
+          quests={quests}
           completions={completions}
           onToggleQuest={toggleQuest}
           onBack={() => setOpenHobby(null)}
@@ -145,7 +157,7 @@ export default function App() {
 
           <section className="ranked">
             <h2>Your hobbies</h2>
-            <p className="hint">Tap one for its rank, missions, medals, and quests.</p>
+            <p className="hint">Tap one for its rank, steps, medals, and challenges.</p>
             <HobbyList profile={profile} onOpen={openHobbyDetail} />
 
             <div className="add-hobby-wrap">
@@ -191,7 +203,7 @@ export default function App() {
             </p>
             <QuestBoard
               profile={profile}
-              quests={sampleQuests}
+              quests={quests}
               completions={completions}
               onToggle={toggleQuest}
             />
@@ -275,8 +287,8 @@ export default function App() {
                 ♻ Reset all progress
               </button>
               <p className="hint">
-                Keeps every hobby — clears earned levels, medals, missions, and
-                quest completions back to a fresh start.
+                Keeps every hobby — clears earned levels, medals, and quest
+                completions back to a fresh start.
               </p>
             </div>
             <footer>

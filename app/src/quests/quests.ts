@@ -1,14 +1,20 @@
-// Quest model — the "active engine" of The Hobbyist.
+// Quest model — the single "active engine" of The Hobbyist.
 //
-// Two engines drive the sash: the passive mirror (auto-sync from connected
-// sources) and Quests — daily / weekly / monthly challenges the user
-// completes to earn XP and level up a hobby. Quests need no connectors, so
-// they're the graceful path for cold-start and no-API hobbies.
+// A Quest is the ONE kind of thing you check off to earn XP and level a hobby.
+// It comes in two flavours, distinguished by cadence:
+//   • recurring  — daily / weekly / monthly challenges you redo (the engine).
+//   • one-time   — `cadence: 'once'`, gated to a LEVEL. This is the old
+//                  "mission": a per-rung "do this next" step. It used to be a
+//                  teeth-less checklist; now it earns XP like everything else,
+//                  scaled by its level so a Master-rung step is a real reward.
+//
+// There is deliberately no separate "mission" type/store anymore — one Quest,
+// one completion store, one UI. (See the unification note in hobbyDefinition.)
 //
 // This module is pure and testable: quest definitions, XP math, and the
 // completion → level derivation live here; the UI just renders + calls in.
 
-export type QuestCadence = 'daily' | 'weekly' | 'monthly'
+export type QuestCadence = 'daily' | 'weekly' | 'monthly' | 'once'
 
 export interface Quest {
   id: string
@@ -19,16 +25,38 @@ export interface Quest {
   text: string
   /** XP awarded on completion. Bigger cadence = bigger reward. */
   xp: number
+  /**
+   * 0-based level this quest belongs to. Required for one-time (`once`)
+   * quests — they are the per-rung "do this next" ladder, surfaced by level.
+   * Recurring quests leave it undefined (they apply at any level).
+   */
+  level?: number
 }
 
 /** Runtime completion record: questId → ISO timestamp it was completed. */
 export type QuestCompletions = Record<string, string>
 
-/** XP reward per cadence tier — daily small, weekly meaningful, monthly big. */
+/**
+ * XP reward per recurring cadence tier — daily small, weekly meaningful,
+ * monthly big. One-time quests don't use a flat value; their XP scales with
+ * level via `onceXp` (a level-0 step < a daily; a top-rung step ≈ a monthly).
+ */
 export const CADENCE_XP: Record<QuestCadence, number> = {
   daily: 10,
   weekly: 40,
   monthly: 120,
+  once: 0, // placeholder — one-time XP is level-scaled; see onceXp.
+}
+
+/**
+ * XP for a one-time (per-level) quest. Scales with the rung so climbing the
+ * ladder feels earned: 30 / 60 / 90 / 120 / 150 for levels 0–4. Sits between
+ * a daily (10) and a monthly (120), so one-time steps matter but don't dwarf
+ * the recurring engine.
+ */
+export function onceXp(level: number): number {
+  const lvl = Math.max(0, Math.floor(level || 0))
+  return 30 + lvl * 30
 }
 
 /**

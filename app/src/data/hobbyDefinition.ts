@@ -26,7 +26,13 @@ import {
   type MedalTier,
 } from '../quests/medals'
 import { sampleQuests } from '../quests/sampleQuests'
-import { LEVEL_XP_THRESHOLDS, type QuestCadence } from '../quests/quests'
+import {
+  LEVEL_XP_THRESHOLDS,
+  CADENCE_XP,
+  onceXp,
+  type QuestCadence,
+  type Quest,
+} from '../quests/quests'
 import { sampleProfile } from './sampleProfile'
 
 // ---- Authored progression pieces ------------------------------------------
@@ -38,18 +44,31 @@ export interface LevelDef {
   xpThreshold: number
 }
 
-/** A suggested next step, tagged to a level. Lifts `Mission` to definition data. */
+/**
+ * A suggested next step, tagged to a level. DEPRECATED: missions are now
+ * modelled as one-time quests (`QuestDef` with `cadence:'once'` + `level`).
+ * The type is retained only so definitions persisted before the unification
+ * still parse; `buildSeedDefinitions` no longer emits any, and the accessors
+ * fold any legacy `missions` into the quest list.
+ */
 export interface MissionDef {
   text: string
   /** 0-based level index this mission belongs to. */
   level: number
 }
 
-/** A daily/weekly/monthly XP challenge. Lifts a `Quest` minus its derived xp. */
+/**
+ * A challenge that earns XP. Unifies the old mission + quest split:
+ *   • recurring — cadence daily/weekly/monthly, repeatable (the engine).
+ *   • one-time  — cadence 'once' + a `level`, the per-rung "do this next"
+ *                 step that used to be a Mission. Now XP-bearing (onceXp).
+ */
 export interface QuestDef {
   id: string
   cadence: QuestCadence
   text: string
+  /** Required for one-time (`once`) quests: the 0-based level they belong to. */
+  level?: number
 }
 
 /**
@@ -228,22 +247,30 @@ export function buildSeedDefinitions(): HobbyDefinition[] {
   for (const name of names) {
     const seeded = seededHobby.get(name)
     const medals = MEDALS_BY_HOBBY[name] ?? []
-    const missions: MissionDef[] = (seeded?.missions ?? []).map((m) => ({
+    // Recurring quests (daily/weekly/monthly) from the sample quest catalog.
+    const recurring: QuestDef[] = sampleQuests
+      .filter((q) => q.hobby === name)
+      .map((q) => ({ id: q.id, cadence: q.cadence, text: q.text }))
+    // One-time quests folded from the seed hobby's old missions — the per-rung
+    // "do this next" steps, now XP-bearing. Stable id from slug + level + index.
+    const slug = slugify(name)
+    const onceQuests: QuestDef[] = (seeded?.missions ?? []).map((m, i) => ({
+      id: `${slug}-once-${m.level}-${i}`,
+      cadence: 'once' as const,
       text: m.text,
       level: m.level,
     }))
-    const quests: QuestDef[] = sampleQuests
-      .filter((q) => q.hobby === name)
-      .map((q) => ({ id: q.id, cadence: q.cadence, text: q.text }))
+    const quests: QuestDef[] = [...recurring, ...onceQuests]
 
     defs.push({
-      slug: slugify(name),
+      slug,
       name,
       category: seeded?.category ?? 'Making',
       emblem: seeded?.icon ?? '✨',
       description: `${name} — a hobby in your collection.`,
       levels: defaultLevels(),
-      missions,
+      // Missions are unified into quests (cadence 'once'); none authored here.
+      missions: [],
       quests,
       badges: medals.map(badgeFromMedal),
       // Step-1 local defaults: unclaimed (no owner), single member (you), v1 published.
@@ -288,9 +315,48 @@ export function milestonesFromDefinition(
   )
 }
 
-/** The definition's authored missions (the per-rung "what do I do next" spine). */
+/**
+ * Materialize a definition's quests into runtime `Quest[]` with XP computed:
+ * recurring quests use CADENCE_XP; one-time (`once`) quests use onceXp(level).
+ * Also folds any LEGACY `missions` (from a definition persisted before the
+ * unification) into one-time quests, so old stored data keeps working.
+ */
+export function questsFromDefinition(def: HobbyDefinition): Quest[] {
+  const fromQuests: Quest[] = def.quests.map((q) => ({
+    id: q.id,
+    hobby: def.name,
+    cadence: q.cadence,
+    text: q.text,
+    level: q.level,
+    xp: q.cadence === 'once' ? onceXp(q.level ?? 0) : CADENCE_XP[q.cadence],
+  }))
+  // Legacy missions → one-time quests (only if not already present as quests).
+  const seenText = new Set(fromQuests.map((q) => q.text))
+  const fromMissions: Quest[] = (def.missions ?? [])
+    .filter((m) => !seenText.has(m.text))
+    .map((m, i) => ({
+      id: `${def.slug}-once-${m.level}-${i}`,
+      hobby: def.name,
+      cadence: 'once' as const,
+      text: m.text,
+      level: m.level,
+      xp: onceXp(m.level),
+    }))
+  return [...fromQuests, ...fromMissions]
+}
+
+/**
+ * The definition's one-time quests as `MissionDef[]` (back-compat shim for any
+ * remaining caller that thinks in "missions"). Derived from `cadence:'once'`
+ * quests plus any legacy `missions`.
+ */
 export function missionsFromDefinition(def: HobbyDefinition): MissionDef[] {
-  return def.missions
+  const fromOnce: MissionDef[] = def.quests
+    .filter((q) => q.cadence === 'once')
+    .map((q) => ({ text: q.text, level: q.level ?? 0 }))
+  const seenText = new Set(fromOnce.map((m) => m.text))
+  const legacy = (def.missions ?? []).filter((m) => !seenText.has(m.text))
+  return [...fromOnce, ...legacy]
 }
 
 /** The definition's level ladder as plain names (drop-in for LEVELS). */

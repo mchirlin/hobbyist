@@ -7,10 +7,9 @@ import { definitionStore } from '../data/definitionStore'
 import {
   slugify,
   levelNamesFromDefinition,
-  missionsFromDefinition,
+  questsFromDefinition,
   resourcesFromDefinition,
 } from '../data/hobbyDefinition'
-import { missionProgressStore, isMissionDone } from '../data/missionProgress'
 import { hobbyXp, xpToNextLevel, isCompleted } from '../quests/quests'
 import { MedalCase } from './MedalCase'
 import { HobbyEditPanel } from './HobbyEditPanel'
@@ -18,6 +17,7 @@ import { HobbyEditPanel } from './HobbyEditPanel'
 interface Props {
   hobby: ProfileHobby
   profile: Profile
+  /** All quests in play (used as the base pool + fallback). */
   quests: Quest[]
   completions: QuestCompletions
   onToggleQuest: (questId: string) => void
@@ -35,14 +35,14 @@ const CADENCE_LABEL: Record<string, string> = {
   daily: 'Daily',
   weekly: 'Weekly',
   monthly: 'Monthly',
+  once: 'Step',
 }
 
 /**
- * The DRILL-DOWN view for a single hobby — the app-like detail screen reached
- * by tapping a hobby on the home list. All the per-hobby depth that used to
- * stack inline on one long page lives here, scoped to this hobby only: the
- * level ladder, self-attested missions, the medal case, this hobby's quests,
- * curated links, and the admin edit panel. A back button returns to home.
+ * The DRILL-DOWN view for a single hobby. All per-hobby depth lives here,
+ * scoped to this hobby: level ladder, the unified QUEST list (one-time "steps"
+ * + recurring "challenges" — missions and quests are now one thing), the medal
+ * case, curated links, and the admin edit panel.
  */
 export function HobbyDetail({
   hobby,
@@ -56,11 +56,6 @@ export function HobbyDetail({
     definitionStore.subscribe,
     definitionStore.getSnapshot,
   )
-  const missionDone = useSyncExternalStore(
-    missionProgressStore.subscribe,
-    missionProgressStore.getSnapshot,
-    missionProgressStore.getSnapshot,
-  )
   const [claimed, setClaimed] = useState<Record<string, boolean>>({})
   const toggleClaim = (badgeId: string) =>
     setClaimed((c) => ({ ...c, [badgeId]: !c[badgeId] }))
@@ -72,23 +67,24 @@ export function HobbyDetail({
   const rungNames = def ? levelNamesFromDefinition(def) : [...LEVELS]
   const level = Math.min(h.level ?? 0, rungNames.length - 1)
 
-  // Missions — authored (definition) preferred, else profile seed. Done-state
-  // from the persisted store is authoritative; the seed `done` is a fallback.
-  const doneTexts = new Set((h.missions ?? []).filter((m) => m.done).map((m) => m.text))
-  const authored = def ? missionsFromDefinition(def) : []
-  const missionPool = (authored.length > 0 ? authored : h.missions ?? []).map((m) => ({
-    text: m.text,
-    level: m.level,
-    done:
-      isMissionDone(missionDone, slug, m.text) ||
-      ('done' in m ? Boolean(m.done) : doneTexts.has(m.text)),
-  }))
-  const relevantMissions = missionPool.filter((m) => m.level >= level)
-  const shownMissions = relevantMissions.length > 0 ? relevantMissions : missionPool
+  // The ONE source of quests for this hobby: the definition (recurring +
+  // one-time), falling back to the passed pool for a hobby with no definition.
+  const myQuests: Quest[] = def
+    ? questsFromDefinition(def)
+    : quests.filter((q) => q.hobby === h.name)
 
-  // This hobby's quests only, with its XP progress toward the next level.
-  const myQuests = quests.filter((q) => q.hobby === h.name)
-  const xp = hobbyXp(quests, completions, h.name)
+  // Split for display: one-time "steps" (the old missions, now XP-bearing) vs
+  // recurring "challenges". Steps are surfaced from the current level up.
+  const steps = myQuests
+    .filter((q) => q.cadence === 'once')
+    .filter((q) => (q.level ?? 0) >= level)
+    .sort((a, b) => (a.level ?? 0) - (b.level ?? 0))
+  const stepsToShow =
+    steps.length > 0 ? steps : myQuests.filter((q) => q.cadence === 'once')
+  const challenges = myQuests.filter((q) => q.cadence !== 'once')
+
+  // XP progress toward the next level — the SAME completions store for all.
+  const xp = hobbyXp(myQuests, completions, h.name)
   const next = xpToNextLevel(xp)
   const resources = def ? resourcesFromDefinition(def) : []
 
@@ -132,67 +128,42 @@ export function HobbyDetail({
         )}
       </section>
 
-      {/* missions */}
-      {shownMissions.length > 0 && (
+      {/* one-time steps (old missions, now XP-bearing quests) */}
+      {stepsToShow.length > 0 && (
         <section className="detail-section">
-          <h3>Missions</h3>
-          <ul className="mission-check-list" aria-label={`Missions for ${h.name}`}>
-            {shownMissions.map((m, i) => (
-              <li
-                className={'mission-check-item' + (m.done ? ' done' : '')}
-                key={`${m.text}-${i}`}
-              >
-                <label className="mission-check">
-                  <input
-                    type="checkbox"
-                    checked={m.done}
-                    onChange={() => missionProgressStore.toggle(slug, m.text)}
-                    aria-label={`Complete mission: ${m.text}`}
-                  />
-                  <span className="mission-box" aria-hidden style={{ borderColor: color }}>
-                    {m.done ? '✓' : ''}
-                  </span>
-                </label>
-                <span className="mission-check-text">{m.text}</span>
-              </li>
+          <h3>Steps</h3>
+          <p className="hint">One-time goals for your level — each earns XP.</p>
+          <ul className="quest-list" aria-label={`Steps for ${h.name}`}>
+            {stepsToShow.map((q) => (
+              <QuestRow
+                key={q.id}
+                quest={q}
+                color={color}
+                done={isCompleted(completions, q.id)}
+                onToggle={onToggleQuest}
+                meta={rungNames[Math.min(q.level ?? 0, rungNames.length - 1)]}
+              />
             ))}
           </ul>
         </section>
       )}
 
-      {/* this hobby's quests */}
-      {myQuests.length > 0 && (
+      {/* recurring challenges */}
+      {challenges.length > 0 && (
         <section className="detail-section">
-          <h3>Quests</h3>
-          <p className="hint">Complete challenges to earn XP and level up.</p>
-          <ul className="quest-list">
-            {myQuests.map((q) => {
-              const done = isCompleted(completions, q.id)
-              return (
-                <li key={q.id} className={'quest-item' + (done ? ' done' : '')}>
-                  <label className="quest-check">
-                    <input
-                      type="checkbox"
-                      checked={done}
-                      onChange={() => onToggleQuest(q.id)}
-                      aria-label={`Complete quest: ${q.text}`}
-                    />
-                    <span className="quest-box" aria-hidden style={{ borderColor: color }}>
-                      {done ? '✓' : ''}
-                    </span>
-                  </label>
-                  <div className="quest-body">
-                    <span className="quest-text">{q.text}</span>
-                    <span className="quest-meta">
-                      <span className="quest-hobby" style={{ color }}>
-                        {CADENCE_LABEL[q.cadence] ?? q.cadence}
-                      </span>
-                      <span className="quest-xp">+{q.xp} XP</span>
-                    </span>
-                  </div>
-                </li>
-              )
-            })}
+          <h3>Challenges</h3>
+          <p className="hint">Repeatable daily, weekly &amp; monthly — earn XP, level up.</p>
+          <ul className="quest-list" aria-label={`Challenges for ${h.name}`}>
+            {challenges.map((q) => (
+              <QuestRow
+                key={q.id}
+                quest={q}
+                color={color}
+                done={isCompleted(completions, q.id)}
+                onToggle={onToggleQuest}
+                meta={CADENCE_LABEL[q.cadence] ?? q.cadence}
+              />
+            ))}
           </ul>
         </section>
       )}
@@ -237,5 +208,46 @@ export function HobbyDetail({
         </div>
       </section>
     </div>
+  )
+}
+
+/** One quest row — a self-attested checkbox + text + a meta tag (level or cadence)
+ *  + its XP. Shared by the Steps and Challenges lists. */
+function QuestRow({
+  quest,
+  color,
+  done,
+  onToggle,
+  meta,
+}: {
+  quest: Quest
+  color: string
+  done: boolean
+  onToggle: (id: string) => void
+  meta: string
+}) {
+  return (
+    <li className={'quest-item' + (done ? ' done' : '')}>
+      <label className="quest-check">
+        <input
+          type="checkbox"
+          checked={done}
+          onChange={() => onToggle(quest.id)}
+          aria-label={`Complete quest: ${quest.text}`}
+        />
+        <span className="quest-box" aria-hidden style={{ borderColor: color }}>
+          {done ? '✓' : ''}
+        </span>
+      </label>
+      <div className="quest-body">
+        <span className="quest-text">{quest.text}</span>
+        <span className="quest-meta">
+          <span className="quest-hobby" style={{ color }}>
+            {meta}
+          </span>
+          <span className="quest-xp">+{quest.xp} XP</span>
+        </span>
+      </div>
+    </li>
   )
 }
