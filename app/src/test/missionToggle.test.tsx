@@ -23,20 +23,24 @@ describe('App mission done toggle', () => {
 
   it('checking a mission marks it done and persists to the store', async () => {
     render(<App />)
+    const user = userEvent.setup()
+
+    // Missions now live in the hobby drill-down — open 3D Printing first.
+    await user.click(screen.getByRole('button', { name: /Open 3D Printing/i }))
 
     // 3D Printing seeds a level-2 mission; it's relevant at the hobby's level.
     const text = 'Print a multi-part model with moving joints.'
     const box = missionCheckbox(text)
     expect(box.checked).toBe(false)
 
-    await userEvent.click(box)
+    await user.click(box)
 
     // The checkbox reflects done, and the persisted store agrees (survives reload).
     expect(missionCheckbox(text).checked).toBe(true)
     expect(missionProgressStore.isDone('3d-printing', text)).toBe(true)
 
     // Toggling off clears it again.
-    await userEvent.click(missionCheckbox(text))
+    await user.click(missionCheckbox(text))
     expect(missionCheckbox(text).checked).toBe(false)
     expect(missionProgressStore.isDone('3d-printing', text)).toBe(false)
   })

@@ -1,7 +1,7 @@
 import { useMemo, useState, useSyncExternalStore } from 'react'
 import { PlaySash } from './components/PlaySash'
-import { HobbyProgress } from './components/HobbyProgress'
-import { VideoCoachCard } from './components/VideoCoachCard'
+import { HobbyList } from './components/HobbyList'
+import { HobbyDetail } from './components/HobbyDetail'
 import { EbirdImportCard } from './components/EbirdImportCard'
 import { ConnectorsPanel } from './components/ConnectorsPanel'
 import { AddHobbyButton } from './components/AddHobbyButton'
@@ -12,25 +12,38 @@ import { sampleQuests } from './quests/sampleQuests'
 import { hobbyXp, levelFromXp, type QuestCompletions } from './quests/quests'
 import { profileStore, isDeclared } from './integrations/profileStore'
 import { definitionStore } from './data/definitionStore'
+import { CATEGORY_ARCHETYPE } from './data/sampleProfile'
 import type { Profile } from './data/types'
 import type { HobbyActivity } from './integrations/activity'
 
+type Tab = 'collection' | 'quests' | 'connect' | 'profile'
+
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'collection', label: 'Collection', icon: '🎖️' },
+  { id: 'quests', label: 'Quests', icon: '🎯' },
+  { id: 'connect', label: 'Connect', icon: '🔌' },
+  { id: 'profile', label: 'Profile', icon: '👤' },
+]
+
 export default function App() {
-  // The collection is now PERSISTED (profileStore) — a declared hobby survives
-  // a reload, which is what makes "build a case of patches" feel real. The
-  // store is the single source of truth; add/remove/enrich all go through it.
+  // Collection PERSISTED via profileStore — single source of truth.
   const baseProfile = useSyncExternalStore(
     profileStore.subscribe,
     profileStore.getSnapshot,
     profileStore.getSnapshot,
   )
   const [completions, setCompletions] = useState<QuestCompletions>({})
+
+  // App-shell navigation, modeled on Pokémon GO / Facebook: a persistent
+  // bottom tab bar is the primary nav, each tab is a focused screen, and a
+  // hobby opens into a full-screen detail you back out of. No more one long
+  // scroll with everything stacked.
+  const [tab, setTab] = useState<Tab>('collection')
+  const [openHobby, setOpenHobby] = useState<string | null>(null)
   const [editingImportance, setEditingImportance] = useState(false)
   const [creating, setCreating] = useState(false)
 
-  // The profile that actually drives the sash: base levels raised by quest XP.
-  // Quests never LOWER a hobby (max of base and quest-derived level), so the
-  // passive signal and the active engine compose instead of fighting.
+  // Sash-driving profile: base levels raised by quest XP (never lowered).
   const profile = useMemo<Profile>(() => {
     return {
       ...baseProfile,
@@ -47,14 +60,20 @@ export default function App() {
   const enrichedCount = baseProfile.hobbies.length - declaredCount
   const existingNames = baseProfile.hobbies.map((h) => h.name.toLowerCase())
 
-  // Enrich a hobby from a synced activity signal — persisted via the store, so
-  // the patch flips declared → enriched and stays that way across reloads.
+  // Dominant category → archetype title for the profile identity card.
+  const archetype = useMemo(() => {
+    const byCat: Record<string, number> = {}
+    for (const h of profile.hobbies) {
+      byCat[h.category] = (byCat[h.category] ?? 0) + (h.importance ?? 1)
+    }
+    const top = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0]?.[0]
+    return top ? CATEGORY_ARCHETYPE[top] ?? '' : ''
+  }, [profile])
+
   function applyActivity(a: HobbyActivity) {
     profileStore.applyActivity(a)
   }
 
-  // Toggle a quest's completion (self-attested). The sash reflects any
-  // resulting level-up on its next physics render.
   function toggleQuest(questId: string) {
     setCompletions((c) => {
       const next = { ...c }
@@ -64,125 +83,203 @@ export default function App() {
     })
   }
 
-  return (
-    <main className="page">
-      <header>
-        <h1>The Hobbyist</h1>
-        <p className="tagline">
-          Collect everything you’re into. Tap to add a hobby; connect real data
-          to level it up.
-        </p>
-      </header>
+  function openHobbyDetail(name: string) {
+    setTab('collection')
+    setOpenHobby(name)
+  }
 
-      <section className="cloud-card">
-        <h2>{profile.displayName}’s Collection</h2>
-        <p className="hint">
-          {baseProfile.hobbies.length} patches · {enrichedCount} earned with real
-          data · {declaredCount} waiting to be filled in. Grab a patch and fling
-          it — they bump into each other and settle.
-        </p>
-        <PlaySash profile={profile} size={620} />
+  const activeHobby =
+    openHobby !== null ? profile.hobbies.find((h) => h.name === openHobby) : undefined
 
-        <div className="add-hobby-wrap">
-          {creating ? (
-            <CreateHobbyWizard
-              existing={existingNames}
-              onCancel={() => setCreating(false)}
-              onCommit={(draft) => {
-                // AI-authoring commit: persist the full drafted definition AND
-                // drop the sash patch so the new hobby exists in both layers.
-                definitionStore.addDefinition(draft)
-                profileStore.addHobby({
-                  name: draft.name,
-                  category: draft.category,
-                  icon: draft.emblem,
-                })
-                setCreating(false)
-              }}
-            />
-          ) : (
-            <>
-              <AddHobbyButton
-                existing={existingNames}
-                onAdd={(input) => profileStore.addHobby(input)}
-              />
-              <button className="create-with-ai" onClick={() => setCreating(true)}>
-                ✨ Create with AI — draft everything for me
-              </button>
-            </>
-          )}
-        </div>
-
-        <button
-          className="replay"
-          onClick={() => setEditingImportance((v) => !v)}
-        >
-          {editingImportance ? '✕ Done editing' : '⚖ Edit importance'}
-        </button>
-        {editingImportance && (
-          <div className="importance-panel">
-            <p className="hint">
-              Drag to set how big a part of your life each hobby is — the sash
-              rebalances live. (Connecting real data sets these for you; this is
-              the cold-start + override path.)
-            </p>
-            <ImportanceEditor profile={profile} onChange={profileStore.setImportance} />
-            <div className="declared-manage">
-              {baseProfile.hobbies.filter(isDeclared).map((h) => (
-                <button
-                  key={h.name}
-                  className="declared-remove"
-                  onClick={() => profileStore.removeHobby(h.name)}
-                >
-                  Remove {h.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </section>
-
-      <section className="ranked">
-        <h2>Level up a patch</h2>
-        <p className="hint">
-          The enrich half of the loop — connect a real source and watch an empty
-          patch fill in. Live ones work now; planned ones show where it’s going.
-        </p>
-        <ConnectorsPanel onActivity={applyActivity} />
-      </section>
-
-      <section className="ranked">
-        <EbirdImportCard onActivity={applyActivity} />
-      </section>
-
-      <section className="ranked">
-        <h2>Quests</h2>
-        <p className="hint">
-          No account needed — complete daily, weekly, and monthly challenges to
-          earn XP and level up a patch.
-        </p>
-        <QuestBoard
+  // ---- Full-screen hobby drill-down (overlays the Collection tab) ------
+  if (activeHobby) {
+    return (
+      <main className="page has-tabbar">
+        <HobbyDetail
+          hobby={activeHobby}
           profile={profile}
           quests={sampleQuests}
           completions={completions}
-          onToggle={toggleQuest}
+          onToggleQuest={toggleQuest}
+          onBack={() => setOpenHobby(null)}
         />
-      </section>
+        <TabBar active="collection" onChange={(t) => { setOpenHobby(null); setTab(t) }} />
+      </main>
+    )
+  }
 
-      <section className="ranked">
-        <h2>Medals &amp; missions</h2>
-        <p className="hint">Every hobby has countable medals — and a concrete next step.</p>
-        <HobbyProgress profile={profile} />
-      </section>
+  return (
+    <main className="page has-tabbar">
+      {tab === 'collection' && (
+        <>
+          <header className="app-head">
+            <h1>Collection</h1>
+          </header>
 
-      <section className="ranked">
-        <VideoCoachCard />
-      </section>
+          <section className="cloud-card">
+            <h2>{profile.displayName}’s Collection</h2>
+            <p className="hint">
+              {baseProfile.hobbies.length} patches · {enrichedCount} earned with
+              real data · {declaredCount} to fill in.
+            </p>
+            <PlaySash profile={profile} size={620} />
+          </section>
 
-      <footer>
-        Prototype · your collection is saved in this browser. Add a hobby above,
-        or connect a source to level one up.
-      </footer>
+          <section className="ranked">
+            <h2>Your hobbies</h2>
+            <p className="hint">Tap one for its rank, missions, medals, and quests.</p>
+            <HobbyList profile={profile} onOpen={openHobbyDetail} />
+
+            <div className="add-hobby-wrap">
+              {creating ? (
+                <CreateHobbyWizard
+                  existing={existingNames}
+                  onCancel={() => setCreating(false)}
+                  onCommit={(draft) => {
+                    definitionStore.addDefinition(draft)
+                    profileStore.addHobby({
+                      name: draft.name,
+                      category: draft.category,
+                      icon: draft.emblem,
+                    })
+                    setCreating(false)
+                  }}
+                />
+              ) : (
+                <>
+                  <AddHobbyButton
+                    existing={existingNames}
+                    onAdd={(input) => profileStore.addHobby(input)}
+                  />
+                  <button className="create-with-ai" onClick={() => setCreating(true)}>
+                    ✨ Create with AI — draft everything for me
+                  </button>
+                </>
+              )}
+            </div>
+          </section>
+        </>
+      )}
+
+      {tab === 'quests' && (
+        <>
+          <header className="app-head">
+            <h1>Quests</h1>
+          </header>
+          <section className="ranked">
+            <p className="hint">
+              No account needed — complete daily, weekly, and monthly challenges
+              to earn XP and level up a patch.
+            </p>
+            <QuestBoard
+              profile={profile}
+              quests={sampleQuests}
+              completions={completions}
+              onToggle={toggleQuest}
+            />
+          </section>
+        </>
+      )}
+
+      {tab === 'connect' && (
+        <>
+          <header className="app-head">
+            <h1>Connect data</h1>
+          </header>
+          <section className="ranked">
+            <p className="hint">
+              Connect a real source and watch an empty patch fill in. Live ones
+              work now; planned ones show where it’s going.
+            </p>
+            <ConnectorsPanel onActivity={applyActivity} />
+          </section>
+          <section className="ranked">
+            <EbirdImportCard onActivity={applyActivity} />
+          </section>
+        </>
+      )}
+
+      {tab === 'profile' && (
+        <>
+          <header className="app-head">
+            <h1>Profile</h1>
+          </header>
+
+          <section className="cloud-card profile-id">
+            <div className="profile-avatar" aria-hidden>
+              {profile.displayName.charAt(0)}
+            </div>
+            <h2>{profile.displayName}</h2>
+            {archetype && <p className="profile-archetype">{archetype}</p>}
+            <div className="profile-stats">
+              <div className="profile-stat">
+                <span className="profile-stat-num">{baseProfile.hobbies.length}</span>
+                <span className="profile-stat-label">hobbies</span>
+              </div>
+              <div className="profile-stat">
+                <span className="profile-stat-num">{enrichedCount}</span>
+                <span className="profile-stat-label">with real data</span>
+              </div>
+              <div className="profile-stat">
+                <span className="profile-stat-num">{declaredCount}</span>
+                <span className="profile-stat-label">to fill in</span>
+              </div>
+            </div>
+          </section>
+
+          <section className="ranked">
+            <h2>Manage collection</h2>
+            <button className="replay" onClick={() => setEditingImportance((v) => !v)}>
+              {editingImportance ? '✕ Done editing' : '⚖ Edit importance'}
+            </button>
+            {editingImportance && (
+              <div className="importance-panel">
+                <p className="hint">
+                  Drag to set how big a part of your life each hobby is — the sash
+                  rebalances live.
+                </p>
+                <ImportanceEditor profile={profile} onChange={profileStore.setImportance} />
+                <div className="declared-manage">
+                  {baseProfile.hobbies.filter(isDeclared).map((h) => (
+                    <button
+                      key={h.name}
+                      className="declared-remove"
+                      onClick={() => profileStore.removeHobby(h.name)}
+                    >
+                      Remove {h.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <footer>
+              Prototype · your collection is saved in this browser.
+            </footer>
+          </section>
+        </>
+      )}
+
+      <TabBar active={tab} onChange={setTab} />
     </main>
+  )
+}
+
+/** Persistent bottom tab bar — the app's primary navigation (Pokémon GO /
+ *  Facebook pattern). Fixed to the bottom, notch/home-indicator safe. */
+function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
+  return (
+    <nav className="tabbar" aria-label="Main navigation">
+      {TABS.map((t) => (
+        <button
+          key={t.id}
+          className={'tab' + (active === t.id ? ' active' : '')}
+          onClick={() => onChange(t.id)}
+          aria-current={active === t.id ? 'page' : undefined}
+        >
+          <span className="tab-icon" aria-hidden>{t.icon}</span>
+          <span className="tab-label">{t.label}</span>
+        </button>
+      ))}
+    </nav>
   )
 }

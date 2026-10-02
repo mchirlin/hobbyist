@@ -13,33 +13,41 @@ function questCheckbox(text: string): HTMLInputElement {
 }
 
 // Integration: completing quests must raise the matching hobby's level in the
-// same profile that drives the sash. This is the end-to-end proof the browser
-// click couldn't give (hidden checkbox inputs), locked as a regression test.
-describe('App quest → level integration', () => {
+// same profile that drives the sash — now across the tabbed app shell:
+// Quests tab to complete, then drill into Birding to read its level.
+describe('App quest → level integration (tabbed shell)', () => {
   it('completing Birding quests levels Birding from Novice to Apprentice', async () => {
     render(<App />)
+    const user = userEvent.setup()
 
-    // The "Level up & missions" list shows each hobby's current level. Find the
-    // Birding progress card there and confirm it starts at Novice.
-    const birdingCards = screen
-      .getAllByText('Birding')
-      .map((el) => el.closest('.progress-card'))
-      .filter((c): c is HTMLElement => c !== null)
-    expect(birdingCards.length).toBeGreaterThan(0)
-    const card = birdingCards[0]
-    expect(within(card).getByText('Novice')).toBeInTheDocument()
+    // Go to the Quests tab and complete Birding's monthly (120) + weekly (40)
+    // + a daily (10) = 170 XP, crossing the 60-XP Apprentice threshold.
+    await user.click(screen.getByRole('button', { name: /Quests/i }))
+    await user.click(questCheckbox('Visit a new hotspot and log 10+ species.'))
+    await user.click(questCheckbox('Add a species you have never seen before.'))
+    await user.click(questCheckbox('Log one checklist on eBird today.'))
 
-    // Complete Birding's monthly (120) + weekly (40) + a daily (10) = 170 XP,
-    // which crosses the 60-XP Apprentice threshold.
-    await userEvent.click(questCheckbox('Visit a new hotspot and log 10+ species.'))
-    await userEvent.click(questCheckbox('Add a species you have never seen before.'))
-    await userEvent.click(questCheckbox('Log one checklist on eBird today.'))
+    // Back to Collection, drill into the Birding hobby, and confirm the detail
+    // view now reads Apprentice.
+    await user.click(screen.getByRole('button', { name: /^Collection$/i }))
+    await user.click(screen.getByRole('button', { name: /Open Birding/i }))
 
-    // The same Birding card should now read Apprentice.
-    const cardAfter = screen
-      .getAllByText('Birding')
-      .map((el) => el.closest('.progress-card'))
-      .filter((c): c is HTMLElement => c !== null)[0]
-    expect(within(cardAfter).getByText('Apprentice')).toBeInTheDocument()
+    const hero = screen.getByRole('heading', { name: 'Birding' }).closest('.detail-hero')
+    expect(hero).not.toBeNull()
+    expect(within(hero as HTMLElement).getByText('Apprentice')).toBeInTheDocument()
+  })
+
+  it('shows the hobby list on the collection tab and drills into a hobby', async () => {
+    render(<App />)
+    const user = userEvent.setup()
+
+    // Collection tab is default: the hobby list rows are present.
+    const birdingRow = screen.getByRole('button', { name: /Open Birding/i })
+    expect(birdingRow).toBeInTheDocument()
+
+    // Drill in — the detail hero + a Back control appear.
+    await user.click(birdingRow)
+    expect(screen.getByRole('heading', { name: 'Birding' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Back to collection/i })).toBeInTheDocument()
   })
 })
