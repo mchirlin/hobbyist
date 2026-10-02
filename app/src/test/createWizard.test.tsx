@@ -25,6 +25,12 @@ describe('CreateHobbyWizard', () => {
     expect(screen.getByText(/Milestone badges/)).toBeInTheDocument()
     expect(screen.getByText(/Links & communities/)).toBeInTheDocument()
 
+    // Badge art step: the local-generator command, pre-filled for this hobby.
+    expect(screen.getByText(/Badge art/)).toBeInTheDocument()
+    expect(screen.getByText(/generate\.mjs/).textContent).toContain(
+      'node scripts/badge-gen/generate.mjs "Pottery"',
+    )
+
     // Commit.
     await userEvent.click(screen.getByRole('button', { name: /create this hobby/i }))
 

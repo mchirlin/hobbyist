@@ -61,4 +61,9 @@ renderers light up immediately.
   deferred with the renderer change above.
 - **AI-assisted authoring.** The broader vision (AI drafts description, levels,
   missions, AND badges on hobby creation) is recorded in
-  `.kiro/steering/` — this generator is the badge-image piece of it.
+  `.kiro/steering/` — this generator is the badge-image piece of it. The Create
+  wizard (`CreateHobbyWizard`) now surfaces the exact, pre-filled
+  `generate.mjs` command for the hobby being authored (`BadgeArtStep`), so the
+  create flow hands you the one command to run; the PNGs auto-wire on the next
+  build. When a backend lands, that step becomes a live "Generate" button
+  against the proxy with no UX change.

@@ -1335,3 +1335,55 @@ footer code {
   font-size: 0.84rem;
   cursor: pointer;
 }
+
+/* ---- badge-art step (wizard → local generator bridge) -------------------- */
+.badge-art-step { gap: 8px; }
+.badge-art-hint { margin: 0; }
+.badge-art-done {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--ink);
+}
+.badge-art-warn {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #b45309;
+}
+.badge-art-subject { display: flex; flex-direction: column; gap: 4px; }
+.badge-art-subject > span { font-size: 0.78rem; color: var(--muted); }
+.badge-art-subject input {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.84rem;
+  font-family: inherit;
+}
+.badge-art-cmd {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+.badge-art-cmd > code {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  background: var(--line);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.78rem;
+}
+.badge-art-copy {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.badge-art-copy:hover { border-color: var(--muted); }

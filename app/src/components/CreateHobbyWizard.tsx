@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { HobbyCategory } from '../data/types'
 import { draftHobby, type HobbyDraft } from '../data/draftHobby'
 import type { ResourceKind } from '../data/hobbyDefinition'
+import { BadgeArtStep } from './BadgeArtStep'
+import { badgeSubjectFor } from '../data/badgeSubjects'
 
 const CATEGORIES: HobbyCategory[] = [
   'Outdoors',
@@ -50,6 +52,9 @@ export function CreateHobbyWizard({ onCommit, onCancel, existing }: Props) {
   const [category, setCategory] = useState<HobbyCategory>('Making')
   const [emoji, setEmoji] = useState('')
   const [draft, setDraft] = useState<HobbyDraft | null>(null)
+  // The badge-art subject phrase, pre-filled from the curated map on draft and
+  // editable in the badge-art step. Carried here so a tweak survives re-renders.
+  const [artSubject, setArtSubject] = useState('')
 
   const trimmed = name.trim()
   const isDup = trimmed.length > 0 && existing.includes(trimmed.toLowerCase())
@@ -59,6 +64,7 @@ export function CreateHobbyWizard({ onCommit, onCancel, existing }: Props) {
     if (!canDraft) return
     const { draft } = draftHobby(trimmed, category, { emblem: emoji.trim() || undefined })
     setDraft(draft)
+    setArtSubject(badgeSubjectFor(trimmed).subject)
     setStep('review')
   }
 
@@ -250,6 +256,10 @@ export function CreateHobbyWizard({ onCommit, onCancel, existing }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Badge art — the bridge to the local generator (no backend; see
+          BadgeArtStep for why it's a command, not an in-app invoke). */}
+      <BadgeArtStep name={draft.name} subject={artSubject} onSubjectChange={setArtSubject} />
 
       {/* Resources / links */}
       <div className="wizard-facet">
