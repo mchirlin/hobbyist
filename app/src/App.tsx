@@ -11,6 +11,7 @@ import { ImportanceEditor } from './components/ImportanceEditor'
 import { sampleQuests } from './quests/sampleQuests'
 import { hobbyXp, levelFromXp, type QuestCompletions } from './quests/quests'
 import { profileStore, isDeclared } from './integrations/profileStore'
+import { missionProgressStore } from './data/missionProgress'
 import { definitionStore } from './data/definitionStore'
 import { CATEGORY_ARCHETYPE } from './data/sampleProfile'
 import type { Profile } from './data/types'
@@ -81,6 +82,23 @@ export default function App() {
       else next[questId] = new Date().toISOString()
       return next
     })
+  }
+
+  // Wipe all earned progress but KEEP every hobby (and its definition). Resets
+  // the three progress layers: synced levels/metrics (profileStore), mission
+  // done-flags (missionProgressStore), and quest completions (local state).
+  function resetProgress() {
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm(
+        'Clear all progress from every hobby? Your hobbies stay — only levels, medals, missions, and quest completions are reset.',
+      )
+    ) {
+      return
+    }
+    profileStore.clearProgress()
+    missionProgressStore.reset()
+    setCompletions({})
   }
 
   function openHobbyDetail(name: string) {
@@ -252,6 +270,15 @@ export default function App() {
                 </div>
               </div>
             )}
+            <div className="danger-zone">
+              <button className="reset-progress" onClick={resetProgress}>
+                ♻ Reset all progress
+              </button>
+              <p className="hint">
+                Keeps every hobby — clears earned levels, medals, missions, and
+                quest completions back to a fresh start.
+              </p>
+            </div>
             <footer>
               Prototype · your collection is saved in this browser.
             </footer>

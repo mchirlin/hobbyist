@@ -756,6 +756,24 @@ footer code {
 }
 .declared-remove:hover { border-color: #e03131; color: #e03131; }
 
+/* ---- Danger zone (reset progress) --------------------------------------- */
+.danger-zone {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.reset-progress {
+  padding: 8px 14px;
+  border: 1px solid #e03131;
+  border-radius: 8px;
+  background: var(--bg);
+  color: #e03131;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.reset-progress:hover { background: #e03131; color: #fff; }
+
 /* ---- Milestone badges (connector-less, human-claimed) ------------------- */
 .medal.milestone .milestone-disc {
   border: 1.5px dashed var(--muted);

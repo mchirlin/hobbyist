@@ -155,6 +155,31 @@ export function applyActivity(backend: StorageBackend, a: HobbyActivity): Profil
   return next
 }
 
+/**
+ * Clear all PROGRESS from every hobby while KEEPING the hobbies themselves —
+ * "just have the hobbies in the db". A hobby's identity (name, category, icon,
+ * importance) is preserved; the earned progress (level, synced metricCounts,
+ * per-hobby mission done-flags) is stripped, so each patch returns to its
+ * declared "connect to level up" state. The hobby list length is unchanged, so
+ * authored/added hobbies are not lost. Returns the resulting profile.
+ */
+export function clearProgress(backend: StorageBackend): Profile {
+  const profile = readProfile(backend)
+  const next: Profile = {
+    ...profile,
+    hobbies: profile.hobbies.map((h) => ({
+      name: h.name,
+      category: h.category,
+      importance: h.importance,
+      icon: h.icon,
+      level: 0,
+      // metricCounts and missions deliberately dropped → back to declared.
+    })),
+  }
+  writeProfile(backend, next)
+  return next
+}
+
 // ---- Browser-facing store with subscribe (for React) ----------------------
 
 function browserBackend(): StorageBackend {
@@ -209,6 +234,12 @@ export const profileStore = (() => {
     },
     applyActivity(a: HobbyActivity): Profile {
       const p = applyActivity(backend, a)
+      emit()
+      return p
+    },
+    /** Clear progress from every hobby, keeping the hobbies themselves. */
+    clearProgress(): Profile {
+      const p = clearProgress(backend)
       emit()
       return p
     },

@@ -6,6 +6,7 @@ import {
   removeHobby,
   setImportance,
   applyActivity,
+  clearProgress,
   profileStore,
   type StorageBackend,
 } from './profileStore'
@@ -169,5 +170,45 @@ describe('profileStore (browser singleton) — persistence + reactivity', () => 
     profileStore.reset()
     expect(profileStore.getSnapshot().hobbies.some((h) => h.name === 'Temporary')).toBe(false)
     expect(profileStore.getSnapshot().hobbies.length).toBe(sampleProfile.hobbies.length)
+  })
+})
+
+describe('clearProgress — wipe progress, keep the hobbies', () => {
+  it('keeps every hobby but strips level, metricCounts, and missions', () => {
+    const b = memBackend()
+    // An enriched hobby (real synced data) + a user-added declared one.
+    applyActivity(b, {
+      hobby: 'Birding', source: 'ebird', activityCount: 200, level: 3, evidence: [],
+      metricCounts: { 'ebird.species': 200 },
+    })
+    addHobby(b, { name: 'Pottery', category: 'Craft', importance: 7, icon: '🏺' })
+    const before = readProfile(b)
+    const beforeNames = before.hobbies.map((h) => h.name).sort()
+
+    const after = clearProgress(b)
+
+    // Same hobbies, same identity — nothing dropped.
+    expect(after.hobbies.map((h) => h.name).sort()).toEqual(beforeNames)
+    const pottery = after.hobbies.find((h) => h.name === 'Pottery')!
+    expect(pottery.importance).toBe(7) // identity preserved
+    expect(pottery.icon).toBe('🏺')
+    // Every hobby is back to declared, zero level, no synced metrics.
+    for (const h of after.hobbies) {
+      expect(h.level).toBe(0)
+      expect(h.metricCounts).toBeUndefined()
+      expect(h.missions).toBeUndefined()
+      expect(isDeclared(h)).toBe(true)
+    }
+  })
+
+  it('persists the cleared profile (survives a re-read)', () => {
+    const b = memBackend()
+    applyActivity(b, {
+      hobby: 'Birding', source: 'ebird', activityCount: 50, level: 2, evidence: [],
+      metricCounts: { 'ebird.species': 50 },
+    })
+    clearProgress(b)
+    const reread = readProfile(b)
+    expect(reread.hobbies.every((h) => isDeclared(h))).toBe(true)
   })
 })
