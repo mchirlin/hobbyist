@@ -5,11 +5,13 @@ import { VideoCoachCard } from './components/VideoCoachCard'
 import { EbirdImportCard } from './components/EbirdImportCard'
 import { ConnectorsPanel } from './components/ConnectorsPanel'
 import { AddHobbyButton } from './components/AddHobbyButton'
+import { CreateHobbyWizard } from './components/CreateHobbyWizard'
 import { QuestBoard } from './components/QuestBoard'
 import { ImportanceEditor } from './components/ImportanceEditor'
 import { sampleQuests } from './quests/sampleQuests'
 import { hobbyXp, levelFromXp, type QuestCompletions } from './quests/quests'
 import { profileStore, isDeclared } from './integrations/profileStore'
+import { definitionStore } from './data/definitionStore'
 import type { Profile } from './data/types'
 import type { HobbyActivity } from './integrations/activity'
 
@@ -24,6 +26,7 @@ export default function App() {
   )
   const [completions, setCompletions] = useState<QuestCompletions>({})
   const [editingImportance, setEditingImportance] = useState(false)
+  const [creating, setCreating] = useState(false)
 
   // The profile that actually drives the sash: base levels raised by quest XP.
   // Quests never LOWER a hobby (max of base and quest-derived level), so the
@@ -81,10 +84,33 @@ export default function App() {
         <PlaySash profile={profile} size={620} />
 
         <div className="add-hobby-wrap">
-          <AddHobbyButton
-            existing={existingNames}
-            onAdd={(input) => profileStore.addHobby(input)}
-          />
+          {creating ? (
+            <CreateHobbyWizard
+              existing={existingNames}
+              onCancel={() => setCreating(false)}
+              onCommit={(draft) => {
+                // AI-authoring commit: persist the full drafted definition AND
+                // drop the sash patch so the new hobby exists in both layers.
+                definitionStore.addDefinition(draft)
+                profileStore.addHobby({
+                  name: draft.name,
+                  category: draft.category,
+                  icon: draft.emblem,
+                })
+                setCreating(false)
+              }}
+            />
+          ) : (
+            <>
+              <AddHobbyButton
+                existing={existingNames}
+                onAdd={(input) => profileStore.addHobby(input)}
+              />
+              <button className="create-with-ai" onClick={() => setCreating(true)}>
+                ✨ Create with AI — draft everything for me
+              </button>
+            </>
+          )}
         </div>
 
         <button

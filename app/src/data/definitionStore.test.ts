@@ -9,6 +9,8 @@ import {
   setLevels,
   addMilestoneBadge,
   removeBadge,
+  addDefinition,
+  setResources,
   type StorageBackend,
 } from './definitionStore'
 import {
@@ -17,6 +19,7 @@ import {
   levelNamesFromDefinition,
   xpThresholdsFromDefinition,
 } from './hobbyDefinition'
+import { draftHobby } from './draftHobby'
 
 function memBackend(): StorageBackend {
   const m = new Map<string, string>()
@@ -179,5 +182,40 @@ describe('milestone badge authoring (the connector-less unlock)', () => {
       (m) => m.id === added.id,
     )
     expect(stillThere).toBe(false)
+  })
+})
+
+describe('addDefinition (AI-authoring commit)', () => {
+  it('inserts a drafted definition, published with a bumped version', () => {
+    const b = memBackend()
+    const { draft } = draftHobby('Pottery', 'Craft')
+    addDefinition(b, draft)
+    const stored = findDefinition(readDefinitions(b), 'pottery')
+    expect(stored).toBeDefined()
+    expect(stored!.status).toBe('published')
+    expect(stored!.version).toBe(draft.version + 1)
+    expect(stored!.resources && stored!.resources.length).toBeGreaterThan(0)
+  })
+
+  it('does not clobber an existing definition with the same slug', () => {
+    const b = memBackend()
+    const before = findDefinition(readDefinitions(b), 'birding') // a seeded hobby
+    expect(before).toBeDefined()
+    const { draft } = draftHobby('Birding', 'Outdoors')
+    addDefinition(b, draft)
+    const after = findDefinition(readDefinitions(b), 'birding')
+    expect(after).toEqual(before) // untouched — no clobber
+  })
+})
+
+describe('setResources', () => {
+  it('replaces the resource list for a hobby', () => {
+    const b = memBackend()
+    setResources(b, 'ultimate', [
+      { kind: 'community', label: 'r/ultimate', url: 'https://www.reddit.com/r/ultimate/' },
+    ])
+    const def = findDefinition(readDefinitions(b), 'ultimate')!
+    expect(def.resources).toHaveLength(1)
+    expect(def.resources![0].kind).toBe('community')
   })
 })

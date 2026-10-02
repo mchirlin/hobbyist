@@ -1,9 +1,22 @@
 import { useState } from 'react'
 import { definitionStore } from '../data/definitionStore'
-import { slugify } from '../data/hobbyDefinition'
+import {
+  slugify,
+  resourcesFromDefinition,
+  type ResourceLink,
+  type ResourceKind,
+} from '../data/hobbyDefinition'
 import { LevelLadderEditor } from './LevelLadderEditor'
 import { MissionEditor } from './MissionEditor'
 import { HobbyEditor } from './HobbyEditor'
+
+const RESOURCE_KINDS: ResourceKind[] = ['community', 'app', 'website', 'video']
+const RESOURCE_ICON: Record<ResourceKind, string> = {
+  community: '💬',
+  app: '📱',
+  website: '🌐',
+  video: '🎬',
+}
 
 interface Props {
   hobby: string
@@ -19,13 +32,14 @@ interface Props {
  * `embedded` mode, so the authoring logic lives in one place per facet.
  */
 
-type EditTab = 'levels' | 'missions' | 'badges' | 'about'
+type EditTab = 'levels' | 'missions' | 'badges' | 'about' | 'links'
 
 const TABS: { id: EditTab; label: string }[] = [
   { id: 'levels', label: 'Levels' },
   { id: 'missions', label: 'Missions' },
   { id: 'badges', label: 'Badges' },
   { id: 'about', label: 'About' },
+  { id: 'links', label: 'Links' },
 ]
 
 export function HobbyEditPanel({ hobby }: Props) {
@@ -75,6 +89,7 @@ export function HobbyEditPanel({ hobby }: Props) {
         {tab === 'missions' && <MissionEditor hobby={hobby} embedded />}
         {tab === 'badges' && <HobbyEditor hobby={hobby} embedded />}
         {tab === 'about' && <DescriptionEditor slug={slug} />}
+        {tab === 'links' && <ResourcesEditor slug={slug} />}
       </div>
     </div>
   )
@@ -116,6 +131,96 @@ function DescriptionEditor({ slug }: { slug: string }) {
       <div className="desc-actions">
         <button className="desc-save" onClick={save} type="button">
           Save description
+        </button>
+        {saved && <span className="desc-saved">Saved ✓</span>}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * The Links tab — curate the hobby's external resources (community board, apps,
+ * websites, videos). The AI drafter seeds these on create; here the admin edits
+ * them. Local draft list → Save persists the whole list via setResources. The
+ * `community` kind is the flagship "talk to people about this" link (a
+ * subreddit, in practice).
+ */
+function ResourcesEditor({ slug }: { slug: string }) {
+  const def = definitionStore.find(slug)
+  const [rows, setRows] = useState<ResourceLink[]>(
+    def ? resourcesFromDefinition(def) : [],
+  )
+  const [saved, setSaved] = useState(false)
+
+  function update(i: number, partial: Partial<ResourceLink>) {
+    setRows((rs) => rs.map((r, j) => (j === i ? { ...r, ...partial } : r)))
+    setSaved(false)
+  }
+  function remove(i: number) {
+    setRows((rs) => rs.filter((_, j) => j !== i))
+    setSaved(false)
+  }
+  function add() {
+    setRows((rs) => [...rs, { kind: 'website', label: '', url: '' }])
+    setSaved(false)
+  }
+  function save() {
+    // Drop blank rows (no label or url) before persisting.
+    const clean = rows.filter((r) => r.label.trim() && r.url.trim())
+    definitionStore.setResources(slug, clean)
+    setRows(clean)
+    setSaved(true)
+  }
+
+  return (
+    <div className="links-editor">
+      {rows.length === 0 && (
+        <p className="hint">No links yet — add a community board, app, or site.</p>
+      )}
+      {rows.map((r, i) => (
+        <div className="link-row" key={i}>
+          <select
+            className="link-kind"
+            value={r.kind}
+            onChange={(e) => update(i, { kind: e.target.value as ResourceKind })}
+            aria-label={`Resource ${i + 1} type`}
+          >
+            {RESOURCE_KINDS.map((k) => (
+              <option key={k} value={k}>
+                {RESOURCE_ICON[k]} {k}
+              </option>
+            ))}
+          </select>
+          <input
+            className="link-label"
+            placeholder="Label (e.g. r/birding)"
+            value={r.label}
+            onChange={(e) => update(i, { label: e.target.value })}
+            aria-label={`Resource ${i + 1} label`}
+          />
+          <input
+            className="link-url"
+            placeholder="https://…"
+            value={r.url}
+            onChange={(e) => update(i, { url: e.target.value })}
+            aria-label={`Resource ${i + 1} URL`}
+          />
+          <button
+            className="wizard-del"
+            onClick={() => remove(i)}
+            type="button"
+            aria-label="Remove link"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <div className="desc-actions">
+        <button className="link-add" onClick={add} type="button">
+          + Add link
+        </button>
+        <button className="desc-save" onClick={save} type="button">
+          Save links
         </button>
         {saved && <span className="desc-saved">Saved ✓</span>}
       </div>

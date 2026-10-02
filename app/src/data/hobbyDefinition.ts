@@ -79,6 +79,32 @@ export type BadgeDef =
       claim: MilestoneClaim
     }
 
+/**
+ * A curated external resource for a hobby — the "where to go to get into this"
+ * facet. The AI drafter proposes these; the admin curates them. `kind` drives
+ * both the display icon and the ONE special-cased type the product cares about:
+ *   • community — the hobby's main discussion board. In practice a subreddit
+ *                 (r/<something>); the renderer badges it as the canonical
+ *                 "talk to people about this" link, which is why it's a first-
+ *                 class kind rather than a plain website.
+ *   • app       — a mobile/desktop app worth installing (eBird, Strava…).
+ *   • website   — a reference site, wiki, or shop.
+ *   • video     — a channel / course / playlist.
+ * A resource whose `kind` is 'community' and whose url is a subreddit is the
+ * flagship link; connectors (eBird, Strava…) can later bind to an 'app' entry.
+ */
+export type ResourceKind = 'community' | 'app' | 'website' | 'video'
+
+export interface ResourceLink {
+  kind: ResourceKind
+  /** Display label, e.g. "r/birding" or "eBird". */
+  label: string
+  /** Fully-qualified URL. */
+  url: string
+  /** Optional one-line "why this is useful". */
+  note?: string
+}
+
 // ---- The definition --------------------------------------------------------
 
 /**
@@ -99,6 +125,13 @@ export interface HobbyDefinition {
   missions: MissionDef[]
   quests: QuestDef[]
   badges: BadgeDef[]
+  /**
+   * Curated external links (community board, apps, websites, videos). Optional
+   * for back-compat: seed definitions and anything persisted before this field
+   * existed have none, and `resourcesFromDefinition` defaults it to []. The AI
+   * drafter populates it for newly authored hobbies.
+   */
+  resources?: ResourceLink[]
   // community metadata (local/single-user in step 1):
   admins: string[] // ordered; admins[0] = owner. Empty = unclaimed/system-curated.
   memberCount: number
@@ -268,4 +301,9 @@ export function levelNamesFromDefinition(def: HobbyDefinition): string[] {
 /** The definition's XP thresholds (drop-in for LEVEL_XP_THRESHOLDS). */
 export function xpThresholdsFromDefinition(def: HobbyDefinition): number[] {
   return def.levels.map((l) => l.xpThreshold)
+}
+
+/** The definition's curated resource links, defaulting to [] for back-compat. */
+export function resourcesFromDefinition(def: HobbyDefinition): ResourceLink[] {
+  return def.resources ?? []
 }

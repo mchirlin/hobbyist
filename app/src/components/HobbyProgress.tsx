@@ -9,6 +9,7 @@ import {
   slugify,
   levelNamesFromDefinition,
   missionsFromDefinition,
+  resourcesFromDefinition,
 } from '../data/hobbyDefinition'
 import { missionProgressStore, isMissionDone } from '../data/missionProgress'
 import { MedalCase } from './MedalCase'
@@ -16,6 +17,13 @@ import { HobbyEditPanel } from './HobbyEditPanel'
 
 interface Props {
   profile: Profile
+}
+
+const RESOURCE_ICON: Record<string, string> = {
+  community: '💬',
+  app: '📱',
+  website: '🌐',
+  video: '🎬',
 }
 
 /**
@@ -146,8 +154,27 @@ export function HobbyProgress({ profile }: Props) {
               onClaimMilestone={toggleClaim}
             />
 
+            {/* curated links — community board, apps, sites (AI-drafted,
+                admin-curated via the Links tab). Rendered read-only here. */}
+            {def && resourcesFromDefinition(def).length > 0 && (
+              <div className="resource-links" aria-label={`Links for ${h.name}`}>
+                {resourcesFromDefinition(def).map((r, i) => (
+                  <a
+                    key={`${r.url}-${i}`}
+                    className={'resource-link res-' + r.kind}
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={r.note ?? r.url}
+                  >
+                    <span aria-hidden>{RESOURCE_ICON[r.kind] ?? '🔗'}</span> {r.label}
+                  </a>
+                ))}
+              </div>
+            )}
+
             {/* authoring (admin, local in step 1): one Edit entry opens a
-                tabbed panel — Levels · Missions · Badges · About. */}
+                tabbed panel — Levels · Missions · Badges · About · Links. */}
             <div className="authoring-row">
               <HobbyEditPanel hobby={h.name} />
             </div>

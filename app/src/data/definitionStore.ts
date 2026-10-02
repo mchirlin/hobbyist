@@ -17,6 +17,7 @@ import {
   type BadgeDef,
   type MilestoneClaim,
   type LevelDef,
+  type ResourceLink,
   buildSeedDefinitions,
   normalizeLevels,
   slugify,
@@ -91,6 +92,26 @@ export function editDefinition(
 }
 
 // ---- Authoring primitives (COMMUNITY-MODEL §3) -----------------------------
+
+/**
+ * Insert a brand-new definition (the AI-authoring commit path). Unlike the
+ * per-facet editors, this adds a whole definition — the output of the draft
+ * engine, after the admin has reviewed it in the create wizard. Dedup by slug is
+ * a no-op (a hobby with that slug already has a definition, so we don't clobber
+ * it). The committed definition is marked `published` with a bumped version so
+ * it leaves draft state. Returns the full new array.
+ */
+export function addDefinition(
+  backend: StorageBackend,
+  def: HobbyDefinition,
+): HobbyDefinition[] {
+  const defs = readDefinitions(backend)
+  if (defs.some((d) => d.slug === def.slug)) return defs // don't clobber existing
+  const committed: HobbyDefinition = { ...def, status: 'published', version: def.version + 1 }
+  const next = [...defs, committed]
+  writeDefinitions(backend, next)
+  return next
+}
 
 /** Edit the free-text description ("how to get started"). */
 export function setDescription(
@@ -188,6 +209,15 @@ export function removeBadge(
   }))
 }
 
+/** Replace a hobby's curated resource links (the whole list, post-edit). */
+export function setResources(
+  backend: StorageBackend,
+  slug: string,
+  resources: ResourceLink[],
+): HobbyDefinition[] {
+  return editDefinition(backend, slug, (d) => ({ ...d, resources }))
+}
+
 // ---- Browser-facing store with subscribe (for React) ----------------------
 
 function browserBackend(): StorageBackend {
@@ -257,6 +287,17 @@ export const definitionStore = (() => {
     },
     removeBadge(slug: string, badgeId: string) {
       const r = removeBadge(backend, slug, badgeId)
+      emit()
+      return r
+    },
+    setResources(slug: string, resources: ResourceLink[]) {
+      const r = setResources(backend, slug, resources)
+      emit()
+      return r
+    },
+    /** Commit a brand-new drafted definition (the AI-authoring path). */
+    addDefinition(def: HobbyDefinition) {
+      const r = addDefinition(backend, def)
       emit()
       return r
     },

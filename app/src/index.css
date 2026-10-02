@@ -1176,3 +1176,162 @@ footer code {
   font-size: 0.85rem;
   cursor: pointer;
 }
+
+/* ---- AI create wizard ---------------------------------------------------- */
+.create-with-ai {
+  width: 100%;
+  margin-top: 8px;
+  background: var(--ink);
+  color: var(--card);
+  border: none;
+  border-radius: 12px;
+  padding: 11px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.create-with-ai:hover { opacity: 0.92; }
+
+.wizard {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+}
+.wizard-head h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.wizard-emoji-badge { font-size: 1.1rem; }
+.wizard-name {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 1rem;
+}
+.wizard-row { display: flex; gap: 8px; align-items: flex-start; }
+.wizard-emoji {
+  width: 52px;
+  text-align: center;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 1.1rem;
+}
+.wizard-cats { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.wizard-actions { display: flex; gap: 8px; align-items: center; }
+.wizard-draft, .wizard-commit {
+  background: var(--ink);
+  color: var(--card);
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.wizard-draft:disabled { opacity: 0.4; cursor: default; }
+
+.wizard-facet {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.wizard-facet-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.wizard-textarea, .wizard-level-name, .wizard-mission-text, .wizard-quest-text,
+.wizard-badge-name, .wizard-res-label, .wizard-res-url {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+.wizard-level, .wizard-mission, .wizard-quest, .wizard-badge, .wizard-resource {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.wizard-level-name { flex: 1; }
+.wizard-level-xp { font-size: 0.78rem; color: var(--muted); min-width: 56px; text-align: right; }
+.wizard-mission-lvl, .wizard-cadence {
+  font-size: 0.72rem;
+  color: var(--muted);
+  min-width: 54px;
+  text-transform: capitalize;
+}
+.wizard-mission-text, .wizard-quest-text, .wizard-badge-name { flex: 1; }
+.wizard-res-label { flex: 0 0 34%; }
+.wizard-res-url { flex: 1; min-width: 0; }
+.wizard-res-icon { font-size: 0.95rem; }
+.wizard-del {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+.wizard-foot { font-size: 0.76rem; color: var(--muted); margin: 2px 0 0; }
+
+/* ---- resource links (read-only on cards) --------------------------------- */
+.resource-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 2px;
+}
+.resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  text-decoration: none;
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: var(--card);
+}
+.resource-link:hover { border-color: var(--muted); }
+.resource-link.res-community { font-weight: 600; }
+
+/* ---- links editor (edit panel tab) --------------------------------------- */
+.links-editor { display: flex; flex-direction: column; gap: 8px; }
+.link-row { display: flex; gap: 6px; align-items: center; }
+.link-kind, .link-label, .link-url {
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 0.84rem;
+  font-family: inherit;
+}
+.link-label { flex: 0 0 32%; min-width: 0; }
+.link-url { flex: 1; min-width: 0; }
+.link-add {
+  background: transparent;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.84rem;
+  cursor: pointer;
+}
