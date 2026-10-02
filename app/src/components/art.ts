@@ -12,6 +12,7 @@
 // (or dropping a file and mapping it) — no component changes.
 
 import { EMBLEMS, STAR_EMBLEM } from './emblems'
+import { earnedBadge, type GeneratedTier } from './generatedBadges'
 
 export type ArtDescriptor =
   | { kind: 'image'; href: string; alt: string } // external raster/SVG asset
@@ -53,8 +54,23 @@ export function hobbiesWithArt(): string[] {
 /**
  * Resolve the best available art for a hobby, walking the fallback chain.
  * `icon` is the profile hobby's emoji (used only if there's no image/emblem).
+ *
+ * `opts.slug` + `opts.earnedTier` thread the hobby's EARNED RANK through: when
+ * generated tier art exists for that slug at (or below) the earned tier, that
+ * tier-specific image wins — so the sash shows copper→ruby as the hobby climbs.
+ * Without opts (or with no matching generated art) it falls back to the
+ * name-keyed registration chain exactly as before.
  */
-export function resolveArt(hobby: string, icon?: string): ArtDescriptor {
+export function resolveArt(
+  hobby: string,
+  icon?: string,
+  opts?: { slug?: string; earnedTier?: GeneratedTier },
+): ArtDescriptor {
+  if (opts?.slug && opts.earnedTier) {
+    const href = earnedBadge(opts.slug, opts.earnedTier)
+    if (href) return { kind: 'image', href, alt: `${hobby} ${opts.earnedTier} badge` }
+  }
+
   const inline = ART_INLINE.get(hobby)
   if (inline) return { kind: 'inline-svg', svg: inline }
 

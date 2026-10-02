@@ -9,6 +9,9 @@ import { LEVELS } from '../data/types'
 import { CATEGORY_COLOR } from '../data/sampleProfile'
 import { isDeclared } from '../integrations/profileStore'
 import { resolveArt } from './art'
+import { tierForLevel } from './generatedBadges'
+import { slugify } from '../data/hobbyDefinition'
+import { medalsForHobby, medalProgress } from '../quests/medals'
 
 /** Lighten (+) or darken (−) a hex color by a percentage. */
 export function shade(hex: string, pct: number): string {
@@ -48,10 +51,16 @@ interface PatchBodyProps {
 export function PatchBody({ hobby, r }: PatchBodyProps) {
   const color = CATEGORY_COLOR[hobby.category] ?? '#868e96'
   const bumps = Math.max(10, Math.round(r / 4.5))
-  const emblem = resolveArt(hobby.name, hobby.icon)
+  const level = hobby.level ?? 0
+  // Earned RANK → generated badge art. A hobby reads as "maxed" when any of its
+  // medals has hit its top tier, which upgrades a Master's ruby to diamond.
+  const maxed = medalsForHobby(hobby.name).some((m) =>
+    medalProgress(m, hobby.metricCounts?.[m.metricKey] ?? 0).maxed,
+  )
+  const earnedTier = tierForLevel(level, maxed)
+  const emblem = resolveArt(hobby.name, hobby.icon, { slug: slugify(hobby.name), earnedTier })
   const emblemScale = (r * 1.15) / 100
   const showLabel = r > 30
-  const level = hobby.level ?? 0
   // Declared (no real data yet) = an "unearned" patch: faint, outlined, with a
   // "connect to level up" cue. Enriched patches render at full saturation. This
   // is the visible half of the declare-first/enrich-later loop — an empty slot

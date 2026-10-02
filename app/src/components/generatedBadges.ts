@@ -70,3 +70,43 @@ export function registerGeneratedBadges(nameBySlug: Record<string, string>): voi
     if (name) registerArt(name, url, `${name} ${tier} badge`)
   }
 }
+
+// --- Earned-tier mapping ---------------------------------------------------
+// The sash shows a hobby's RANK through its badge art. Rank is the hobby's
+// level (0-based into LEVELS: Novice→Apprentice→Skilled→Expert→Master, 5 rungs),
+// and the generated art ladder has 6 tiers. We map the 5 levels onto the first
+// 5 art tiers and reserve DIAMOND for a "maxed" flourish — a Master whose top
+// medal is also maxed earns the diamond. This keeps every level visually
+// distinct while leaving diamond as the rare "you truly made it" art.
+//
+//   level 0 Novice     → copper
+//   level 1 Apprentice → silver
+//   level 2 Skilled    → gold
+//   level 3 Expert     → emerald
+//   level 4 Master     → ruby   (→ diamond when also maxed)
+
+const LEVEL_TIERS: GeneratedTier[] = ['copper', 'silver', 'gold', 'emerald', 'ruby']
+
+/** The generated-art tier a hobby has EARNED, from its level (+ maxed flag). */
+export function tierForLevel(level: number, maxed = false): GeneratedTier {
+  const clamped = Math.max(0, Math.min(LEVEL_TIERS.length - 1, Math.floor(level)))
+  if (maxed && clamped === LEVEL_TIERS.length - 1) return 'diamond'
+  return LEVEL_TIERS[clamped]
+}
+
+/**
+ * The best generated art for a hobby at its earned tier, degrading DOWNWARD:
+ * if the exact earned tier isn't generated, fall back to the highest generated
+ * tier at or below it (never show a tier the user hasn't reached). Returns
+ * undefined when the hobby has no generated art at or below the earned tier.
+ */
+export function earnedBadge(slug: string, earned: GeneratedTier): string | undefined {
+  const bucket = bySlug.get(slug)
+  if (!bucket) return undefined
+  const idx = LADDER.indexOf(earned)
+  for (let i = idx; i >= 0; i--) {
+    const url = bucket[LADDER[i]]
+    if (url) return url
+  }
+  return undefined
+}

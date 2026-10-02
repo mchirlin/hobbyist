@@ -4,8 +4,10 @@ import App from './App.tsx'
 import { BirdBadge } from './components/BirdBadge.tsx'
 import './index.css'
 import { registerBadgeArt } from './components/badgeArt'
+import { registerServiceWorker } from './registerSW'
 
 registerBadgeArt()
+registerServiceWorker()
 
 // Home surface IS the collection case (declare-first, enrich-later — see
 // ASSESSMENT.md): the multi-hobby sash with instant "add a hobby" is the
