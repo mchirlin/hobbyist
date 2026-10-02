@@ -1,14 +1,16 @@
-// Definition store — the admin-editable, persisted layer for HobbyDefinitions.
+// Definition store — the PER-USER overlay layer over the universal catalog.
 //
-// COMMUNITY-MODEL §6 step 1: "lift the hardcoded catalogs into HobbyDefinition
-// objects, still local — prove the app renders from a definition, not a const,
-// and that a single user can edit their own hobby's levels/missions/badges."
+// COMMUNITY-MODEL §6: the universal hobby catalog is a committed, versioned
+// artifact (src/data/definitions.json, read via catalog.ts). This store holds
+// only what a single user has CHANGED on top of it — their local edits — in
+// localStorage. On a cold start (empty storage) a visitor sees the universal
+// catalog verbatim; once they edit, their edited copy is persisted and wins.
 //
 // This mirrors profileStore.ts exactly: pure read/write/edit over an injected
 // StorageBackend (unit-testable), plus a tiny observable browser store for
-// useSyncExternalStore. It SEEDS from buildSeedDefinitions() on first run — so
-// the hardcoded catalogs remain the source of truth and a cold visitor sees the
-// full set — then every edit is persisted. No backend; "publish" just bumps the
+// useSyncExternalStore. It SEEDS from universalCatalog() on first run — so the
+// committed catalog is the source of truth and a cold visitor sees the full
+// set — then every edit is persisted. No backend; "publish" just bumps the
 // local version (the real admin/version/governance flow is step 3, see §5).
 
 import {
@@ -18,10 +20,10 @@ import {
   type MilestoneClaim,
   type LevelDef,
   type ResourceLink,
-  buildSeedDefinitions,
   normalizeLevels,
   slugify,
 } from './hobbyDefinition'
+import { universalCatalog } from './catalog'
 
 const STORAGE_KEY = 'hobbyist.definitions.v1'
 
@@ -34,18 +36,18 @@ export interface StorageBackend {
 
 // ---- Pure read/write over an injected backend -----------------------------
 
-/** Read definitions, seeding from the catalogs on empty/malformed storage. */
+/** Read definitions, seeding from the universal catalog on empty/malformed storage. */
 export function readDefinitions(backend: StorageBackend): HobbyDefinition[] {
   const raw = backend.getItem(STORAGE_KEY)
-  if (!raw) return buildSeedDefinitions()
+  if (!raw) return universalCatalog()
   try {
     const parsed = JSON.parse(raw)
     if (Array.isArray(parsed) && parsed.every((d) => d && typeof d.slug === 'string')) {
       return parsed as HobbyDefinition[]
     }
-    return buildSeedDefinitions()
+    return universalCatalog()
   } catch {
-    return buildSeedDefinitions()
+    return universalCatalog()
   }
 }
 
@@ -301,7 +303,7 @@ export const definitionStore = (() => {
       emit()
       return r
     },
-    /** Reset to the seed definitions (clears local edits). */
+    /** Reset to the universal catalog (clears local edits). */
     reset(): HobbyDefinition[] {
       backend.removeItem(STORAGE_KEY)
       emit()

@@ -12,7 +12,7 @@
 
 import { registerInlineArt, hobbiesWithArt, unregisterArt } from './art'
 import { registerGeneratedBadges, slugsWithGeneratedBadges } from './generatedBadges'
-import { buildSeedDefinitions } from '../data/hobbyDefinition'
+import { universalCatalog } from '../data/catalog'
 import birdingSvg from '../badges/birding.svg?raw'
 import ultimateSvg from '../badges/ultimate.svg?raw'
 
@@ -24,12 +24,12 @@ export function registerBadgeArt(): void {
   registerInlineArt('Ultimate', ultimateSvg)
 
   // Generated tier badges (local author-time output) are real art and WIN over
-  // a hand-drawn emblem for the same hobby. Keyed by hobby NAME via the seed
-  // definitions' slug→name map. When none are generated this is a no-op and the
+  // a hand-drawn emblem for the same hobby. Keyed by hobby NAME via the universal
+  // catalog's slug→name map. When none are generated this is a no-op and the
   // hand-drawn emblems stand.
   if (slugsWithGeneratedBadges().length > 0) {
     const nameBySlug: Record<string, string> = {}
-    for (const def of buildSeedDefinitions()) nameBySlug[def.slug] = def.name
+    for (const def of universalCatalog()) nameBySlug[def.slug] = def.name
     // registerArt (external image) + registerInlineArt both resolve, but inline
     // is preferred by resolveArt — so clear any hand-drawn inline for a hobby
     // that now has generated art, then register the generated image.

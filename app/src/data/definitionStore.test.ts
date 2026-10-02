@@ -19,6 +19,7 @@ import {
   levelNamesFromDefinition,
   xpThresholdsFromDefinition,
 } from './hobbyDefinition'
+import { universalCatalog } from './catalog'
 import { draftHobby } from './draftHobby'
 
 function memBackend(): StorageBackend {
@@ -31,15 +32,15 @@ function memBackend(): StorageBackend {
 }
 
 describe('readDefinitions', () => {
-  it('seeds from the catalogs on empty storage', () => {
+  it('seeds from the universal catalog on empty storage', () => {
     const b = memBackend()
-    expect(readDefinitions(b)).toEqual(buildSeedDefinitions())
+    expect(readDefinitions(b)).toEqual(universalCatalog())
   })
 
-  it('falls back to the seed on malformed storage', () => {
+  it('falls back to the catalog on malformed storage', () => {
     const b = memBackend()
     b.setItem('hobbyist.definitions.v1', 'not json')
-    expect(readDefinitions(b)).toEqual(buildSeedDefinitions())
+    expect(readDefinitions(b)).toEqual(universalCatalog())
   })
 
   it('round-trips a written array', () => {

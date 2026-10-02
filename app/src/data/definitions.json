@@ -1,0 +1,916 @@
+{
+  "schema": 1,
+  "definitions": [
+    {
+      "slug": "3d-printing",
+      "name": "3D Printing",
+      "category": "Making",
+      "emblem": "🖨️",
+      "description": "3D Printing — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Print a multi-part model with moving joints.",
+          "level": 2
+        },
+        {
+          "text": "Design your own part in CAD and print it.",
+          "level": 3
+        }
+      ],
+      "quests": [
+        {
+          "id": "print-d1",
+          "cadence": "daily",
+          "text": "Start or finish one print."
+        },
+        {
+          "id": "print-w1",
+          "cadence": "weekly",
+          "text": "Tune a setting and compare the result."
+        },
+        {
+          "id": "print-m1",
+          "cadence": "monthly",
+          "text": "Design your own part in CAD and print it."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "printing-prints",
+          "name": "Print Farm",
+          "unit": "finished prints",
+          "metricKey": "printing.prints",
+          "how": "Complete prints — from first cube to full builds.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 25
+            },
+            {
+              "name": "Gold",
+              "threshold": 100
+            },
+            {
+              "name": "Platinum",
+              "threshold": 500
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "electronics",
+      "name": "Electronics",
+      "category": "Making",
+      "emblem": "🔌",
+      "description": "Electronics — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Solder a kit without a cold joint.",
+          "level": 1
+        },
+        {
+          "text": "Build a circuit from a schematic you read yourself.",
+          "level": 2
+        }
+      ],
+      "quests": [
+        {
+          "id": "elec-d1",
+          "cadence": "daily",
+          "text": "Breadboard one small circuit."
+        },
+        {
+          "id": "elec-w1",
+          "cadence": "weekly",
+          "text": "Solder a kit with no cold joints."
+        },
+        {
+          "id": "elec-m1",
+          "cadence": "monthly",
+          "text": "Build a project from a schematic you read yourself."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "electronics-builds",
+          "name": "Solder Slinger",
+          "unit": "builds",
+          "metricKey": "electronics.builds",
+          "how": "Finish circuits — kits and your own designs.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 50
+            },
+            {
+              "name": "Platinum",
+              "threshold": 150
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "ultimate",
+      "name": "Ultimate",
+      "category": "Sport",
+      "emblem": "🥏",
+      "description": "Ultimate — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Throw a backhand and forehand 40+ yards accurately.",
+          "level": 3
+        },
+        {
+          "text": "Captain a team through a tournament.",
+          "level": 4
+        }
+      ],
+      "quests": [
+        {
+          "id": "ultimate-d1",
+          "cadence": "daily",
+          "text": "Do 15 minutes of throwing practice."
+        },
+        {
+          "id": "ultimate-w1",
+          "cadence": "weekly",
+          "text": "Play a full game or scrimmage."
+        },
+        {
+          "id": "ultimate-m1",
+          "cadence": "monthly",
+          "text": "Attend a tournament or league night."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "ultimate-tournaments",
+          "name": "Tournament Circuit",
+          "unit": "tournaments",
+          "metricKey": "ultimate.tournaments",
+          "how": "Play sanctioned WFDF/USAU tournaments.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 5
+            },
+            {
+              "name": "Gold",
+              "threshold": 15
+            },
+            {
+              "name": "Platinum",
+              "threshold": 40
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "id": "ultimate-scores",
+          "name": "Playmaker",
+          "unit": "goals + assists",
+          "metricKey": "ultimate.scores",
+          "how": "Rack up goals and assists across games.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 10
+            },
+            {
+              "name": "Silver",
+              "threshold": 100
+            },
+            {
+              "name": "Gold",
+              "threshold": 500
+            },
+            {
+              "name": "Platinum",
+              "threshold": 1500
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "ukulele",
+      "name": "Ukulele",
+      "category": "Music",
+      "emblem": "🎸",
+      "description": "Ukulele — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Play a clean C–F–G change 10 times in a row.",
+          "level": 1
+        },
+        {
+          "text": "Play a full song start to finish.",
+          "level": 2
+        }
+      ],
+      "quests": [
+        {
+          "id": "uke-d1",
+          "cadence": "daily",
+          "text": "Practice chord changes for 10 minutes."
+        },
+        {
+          "id": "uke-w1",
+          "cadence": "weekly",
+          "text": "Learn one new song section."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "ukulele-songs",
+          "name": "Repertoire",
+          "unit": "songs",
+          "metricKey": "ukulele.songs",
+          "how": "Learn to play full songs start to finish.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 30
+            },
+            {
+              "name": "Platinum",
+              "threshold": 75
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "geocaching",
+      "name": "Geocaching",
+      "category": "Outdoors",
+      "emblem": "📍",
+      "description": "Geocaching — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Find your first 5 caches.",
+          "level": 1
+        },
+        {
+          "text": "Hide and publish a cache of your own.",
+          "level": 2
+        }
+      ],
+      "quests": [
+        {
+          "id": "geo-d1",
+          "cadence": "daily",
+          "text": "Find one cache near you."
+        },
+        {
+          "id": "geo-w1",
+          "cadence": "weekly",
+          "text": "Log 5 finds in a new area."
+        },
+        {
+          "id": "geo-m1",
+          "cadence": "monthly",
+          "text": "Hide and publish a cache of your own."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "geocaching-finds",
+          "name": "Cache Hunter",
+          "unit": "finds",
+          "metricKey": "geocaching.finds",
+          "how": "Find and log caches on geocaching.com.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 5
+            },
+            {
+              "name": "Silver",
+              "threshold": 50
+            },
+            {
+              "name": "Gold",
+              "threshold": 250
+            },
+            {
+              "name": "Platinum",
+              "threshold": 1000
+            }
+          ]
+        },
+        {
+          "kind": "metric",
+          "id": "geocaching-souvenirs",
+          "name": "Souvenir Collector",
+          "unit": "souvenirs",
+          "metricKey": "geocaching.souvenirs",
+          "how": "Earn souvenirs from events and challenges.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 25
+            },
+            {
+              "name": "Platinum",
+              "threshold": 50
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "birding",
+      "name": "Birding",
+      "category": "Outdoors",
+      "emblem": "🐦",
+      "description": "Birding — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Log 10 different species on eBird.",
+          "level": 0
+        },
+        {
+          "text": "Identify 5 birds by call alone.",
+          "level": 1
+        }
+      ],
+      "quests": [
+        {
+          "id": "birding-d1",
+          "cadence": "daily",
+          "text": "Log one checklist on eBird today."
+        },
+        {
+          "id": "birding-d2",
+          "cadence": "daily",
+          "text": "Identify a bird by its call."
+        },
+        {
+          "id": "birding-w1",
+          "cadence": "weekly",
+          "text": "Add a species you have never seen before."
+        },
+        {
+          "id": "birding-m1",
+          "cadence": "monthly",
+          "text": "Visit a new hotspot and log 10+ species."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "birding-species",
+          "name": "Life List",
+          "unit": "species",
+          "metricKey": "ebird.species",
+          "how": "Log distinct species on eBird.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 10
+            },
+            {
+              "name": "Silver",
+              "threshold": 100
+            },
+            {
+              "name": "Gold",
+              "threshold": 300
+            },
+            {
+              "name": "Platinum",
+              "threshold": 600
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "pcb",
+      "name": "PCB",
+      "category": "Making",
+      "emblem": "🔧",
+      "description": "PCB — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Lay out and order your first custom PCB.",
+          "level": 1
+        }
+      ],
+      "quests": [
+        {
+          "id": "pcb-d1",
+          "cadence": "daily",
+          "text": "Sketch or refine a schematic for 15 minutes."
+        },
+        {
+          "id": "pcb-w1",
+          "cadence": "weekly",
+          "text": "Route a board layout end to end."
+        },
+        {
+          "id": "pcb-m1",
+          "cadence": "monthly",
+          "text": "Order a custom PCB and assemble it."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "pcb-boards",
+          "name": "Board Bringup",
+          "unit": "boards",
+          "metricKey": "pcb.boards",
+          "how": "Design, order, and bring up custom PCBs.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 5
+            },
+            {
+              "name": "Gold",
+              "threshold": 20
+            },
+            {
+              "name": "Platinum",
+              "threshold": 50
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "video-making",
+      "name": "Video Making",
+      "category": "Craft",
+      "emblem": "🎬",
+      "description": "Video Making — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Cut a 60-second edit with a hook in the first 3s.",
+          "level": 1
+        }
+      ],
+      "quests": [
+        {
+          "id": "video-d1",
+          "cadence": "daily",
+          "text": "Capture one usable shot."
+        },
+        {
+          "id": "video-w1",
+          "cadence": "weekly",
+          "text": "Cut a 60-second edit with a hook in the first 3s."
+        },
+        {
+          "id": "video-m1",
+          "cadence": "monthly",
+          "text": "Publish a finished video."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "video-uploads",
+          "name": "Showreel",
+          "unit": "videos",
+          "metricKey": "youtube.uploads",
+          "how": "Publish finished edits.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 50
+            },
+            {
+              "name": "Platinum",
+              "threshold": 200
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "storytelling",
+      "name": "Storytelling",
+      "category": "Mind",
+      "emblem": "📖",
+      "description": "Storytelling — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Tell a 5-minute story at an open mic.",
+          "level": 1
+        }
+      ],
+      "quests": [
+        {
+          "id": "story-d1",
+          "cadence": "daily",
+          "text": "Jot down one story beat or anecdote."
+        },
+        {
+          "id": "story-w1",
+          "cadence": "weekly",
+          "text": "Rehearse a 5-minute story out loud."
+        },
+        {
+          "id": "story-m1",
+          "cadence": "monthly",
+          "text": "Tell a story at an open mic."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "storytelling-sets",
+          "name": "Stage Time",
+          "unit": "told sets",
+          "metricKey": "storytelling.sets",
+          "how": "Tell stories at open mics and shows.",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 30
+            },
+            {
+              "name": "Platinum",
+              "threshold": 100
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    },
+    {
+      "slug": "knitting",
+      "name": "Knitting",
+      "category": "Craft",
+      "emblem": "🧶",
+      "description": "Knitting — a hobby in your collection.",
+      "levels": [
+        {
+          "name": "Novice",
+          "xpThreshold": 0
+        },
+        {
+          "name": "Apprentice",
+          "xpThreshold": 60
+        },
+        {
+          "name": "Skilled",
+          "xpThreshold": 200
+        },
+        {
+          "name": "Expert",
+          "xpThreshold": 500
+        },
+        {
+          "name": "Master",
+          "xpThreshold": 1000
+        }
+      ],
+      "missions": [
+        {
+          "text": "Knit a scarf in garter stitch.",
+          "level": 0
+        }
+      ],
+      "quests": [
+        {
+          "id": "knit-d1",
+          "cadence": "daily",
+          "text": "Knit at least 5 rows."
+        },
+        {
+          "id": "knit-w1",
+          "cadence": "weekly",
+          "text": "Finish a small project (coaster, swatch)."
+        }
+      ],
+      "badges": [
+        {
+          "kind": "metric",
+          "id": "knitting-projects",
+          "name": "Finished Objects",
+          "unit": "projects",
+          "metricKey": "knitting.projects",
+          "how": "Complete knitting projects (FOs).",
+          "tiers": [
+            {
+              "name": "Bronze",
+              "threshold": 1
+            },
+            {
+              "name": "Silver",
+              "threshold": 10
+            },
+            {
+              "name": "Gold",
+              "threshold": 40
+            },
+            {
+              "name": "Platinum",
+              "threshold": 100
+            }
+          ]
+        }
+      ],
+      "admins": [],
+      "memberCount": 1,
+      "version": 1,
+      "status": "published"
+    }
+  ]
+}
